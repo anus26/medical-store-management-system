@@ -1,0 +1,16 @@
+<h2>Create Sale</h2>
+<form method="Post">
+    {% csrf_token %}
+    <label >Medicine:</label>
+    <select name="medicine" >
+        {%for m in medicines%}
+        <option value="{{ m.id }}">{{ m.name }}</option>
+        {%endfor%}
+
+    </select>
+    <label >Quantity:</label>
+<input type="number" name="quantity">
+<label >Price:</label>
+<!-- <input type="number" name=""> -->
+    <button type="submit">Generate Bill</button>
+</form>
