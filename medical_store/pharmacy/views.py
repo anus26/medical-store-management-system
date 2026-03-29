@@ -5,7 +5,14 @@ from .forms import MedicineForm
 
 
 def home(request):
-    return render(request, 'index.html')
+    medicines=Medicine.objects.all()
+    tablets=Medicine.objects.filter(category='Tablet')
+    syrups=Medicine.objects.filter(category='Syrup')
+    return render(request, 'index.html',
+                { 'medicines':medicines,
+                 'tablets':tablets,
+                 'syrups':syrups}
+                  )
 
 
 def add_medicine(request):
@@ -25,7 +32,17 @@ def create_sale(request):
         quantity = int(request.POST.get('quantity'))
 
         medicine = Medicine.objects.get(id=medicine_id)
+        if quantity > medicine.quantity:
+            return render(request, 'create_sale.html', {
+                'medicines': medicines,
+                'error': "Not enough stock!"
+            })
+
         total_price = medicine.price * quantity
+
+        # ✅ STOCK DECREASE
+        medicine.quantity -= quantity
+        medicine.save()
 
         # Sale save karo
         Sale.objects.create(
@@ -35,7 +52,7 @@ def create_sale(request):
         )
 
         # Invoice page
-        return render(request, 'invoice.html', {
+        return render(request, 'invoices.html', {
             'medicine': medicine,
             'quantity': quantity,
             'total': total_price
@@ -43,3 +60,6 @@ def create_sale(request):
 
     # GET request → form show karo
     return render(request, 'create_sale.html', {'medicines': medicines})
+def invoices(request):
+    sales = Sale.objects.all()
+    return render(request, 'invoices.html', {'sales': sales})

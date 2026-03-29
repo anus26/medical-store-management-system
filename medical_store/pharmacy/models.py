@@ -4,7 +4,7 @@ class Medicine(models.Model):
     name=models.CharField(max_length=100)
     category=models.CharField(max_length=100)
     price=models.FloatField()
-    qunatity=models.IntegerField()
+    quantity=models.IntegerField()
     expiry_date=models.DateField()
 
     def __str__(self):
@@ -24,6 +24,6 @@ class Sale(models.Model):
     data=models.DateField(auto_now_add=True)    
     def save(self,*args,**kwargs):
         self.total_price=self.medicine.price*self.quantity
-        self.medicine.qunatity-=self.quantity
+        self.medicine.quantity-=self.quantity
         self.medicine.save()
         super().save(*args,**kwargs)

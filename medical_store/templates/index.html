@@ -1,7 +1,39 @@
 <h1>Medical Store Management System</h1>
 <a href="/add_medicine/">Add Medicine</a>
 <a href="/create_sale/">Sales</a>
+<h3>All Medicines</h3>
+<table border="1">
+    <tr>
+        <th>Name</th>
+        <th>Category</th>
+        <th>Quantity</th>
+        <th>Expiry</th>
+    </tr>
+    {% for m in medicines %}
+    <tr>
+        <td>{{m.name}}</td>
+        <td>{{m.category}}</td>
+        <td>{{m.quantity}}</td>
+        <td>{{m.expiry_date}}</td>
+    </tr>
+{% endfor %}
+
+</table>
 <!-- <a href="/invoices">Invoices</a> -->
 
 
-</form>
+<h2>💊 Tablets</h2>
+<ul>
+    {% for t in tablets %}
+    <li>{{ t.name }} (Stock: {{ t.quantity }})</li>
+    {% endfor %}
+</ul>
+<h2>🧴 Syrups</h2>
+<ul>
+    {% for s in syrups %}
+    <li>{{ s.name }} (Stock: {{ s.quantity }})</li>
+    {% endfor %}
+</ul>
+{% if m.quantity < 10 %}
+<td style="color:red;">Low Stock</td>
+{% endif %}

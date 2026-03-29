@@ -17,12 +17,13 @@
 
 from django.contrib import admin
 from django.urls import path
-from pharmacy.views import create_sale, home,add_medicine
+from pharmacy.views import invoices,create_sale, home,add_medicine
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('',home,name='home'),
     path('add_medicine/', add_medicine, name='add_medicine'),
     path('create_sale/', create_sale, name='create_sale'),
+    path('invoices/', invoices, name='invoices')
     
 ]

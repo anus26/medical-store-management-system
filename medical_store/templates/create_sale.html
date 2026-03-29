@@ -3,9 +3,9 @@
     {% csrf_token %}
     <label >Medicine:</label>
     <select name="medicine" >
-        {%for m in medicines%}
+        {% for m in medicines %}
         <option value="{{ m.id }}">{{ m.name }}</option>
-        {%endfor%}
+        {% endfor %}
 
     </select>
     <label >Quantity:</label>
@@ -13,4 +13,7 @@
 <label >Price:</label>
 <!-- <input type="number" name=""> -->
     <button type="submit">Generate Bill</button>
+    {% if error %}
+<p style="color:red;">{{ error }}</p>
+{% endif %}
 </form>
