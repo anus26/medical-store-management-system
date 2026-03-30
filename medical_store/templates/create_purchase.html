@@ -1,0 +1,26 @@
+<h2>Add Purchase</h2>
+
+<form method="POST">
+    {% csrf_token %}
+
+    <label>Medicine:</label>
+    <select name="medicine">
+        {% for m in medicines %}
+        <option value="{{ m.id }}">
+            {{ m.name }} | Current Stock: {{ m.quantity }}
+        </option>
+        {% endfor %}
+    </select>
+
+    <label>Quantity:</label>
+    <input type="number" name="quantity" required>
+
+    <label>Price:</label>
+    <input type="number" step="0.01" name="price" required>
+
+    <button type="submit">Add Purchase</button>
+
+    {% if error %}
+    <p style="color:red;">{{ error }}</p>
+    {% endif %}
+</form>

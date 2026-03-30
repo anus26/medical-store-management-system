@@ -9,6 +9,15 @@ class Medicine(models.Model):
 
     def __str__(self):
         return self.name
+    
+class Purchase(models.Model):
+    medicine = models.ForeignKey(Medicine, on_delete=models.CASCADE)
+    quantity = models.IntegerField()
+    price = models.FloatField()
+    date = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.medicine.name  
 
 class Supplier(models.Model):
     name=models.CharField(max_length=100)

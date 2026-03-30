@@ -4,3 +4,5 @@ class MedicineForm(forms.ModelForm):
     class Meta:
         model=Medicine
         fields='__all__'
+
+      

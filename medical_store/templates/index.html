@@ -1,6 +1,7 @@
 <h1>Medical Store Management System</h1>
 <a href="/add_medicine/">Add Medicine</a>
 <a href="/create_sale/">Sales</a>
+<a href="/create_purchase/">Purchase</a>
 <h3>All Medicines</h3>
 <table border="1">
     <tr>
@@ -25,7 +26,7 @@
 <h2>💊 Tablets</h2>
 <ul>
     {% for t in tablets %}
-    <li>{{ t.name }} (Stock: {{ t.quantity }})</li>
+    <li>{{ s.name }} (Stock: {{ t.quantity }})</li>
     {% endfor %}
 </ul>
 <h2>🧴 Syrups</h2>

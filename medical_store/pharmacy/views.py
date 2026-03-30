@@ -1,13 +1,13 @@
 from django.shortcuts import render, redirect
 
-from .models import Medicine, Sale
+from .models import Medicine, Sale,Purchase
 from .forms import MedicineForm
 
 
 def home(request):
     medicines=Medicine.objects.all()
-    tablets=Medicine.objects.filter(category='Tablet')
-    syrups=Medicine.objects.filter(category='Syrup')
+    tablets=Medicine.objects.filter(category='Tablets')
+    syrups=Medicine.objects.filter(category='syrup')
     return render(request, 'index.html',
                 { 'medicines':medicines,
                  'tablets':tablets,
@@ -63,3 +63,40 @@ def create_sale(request):
 def invoices(request):
     sales = Sale.objects.all()
     return render(request, 'invoices.html', {'sales': sales})
+
+
+
+def create_purchase(request):
+    medicines = Medicine.objects.all()
+
+    if request.method == "POST":
+        medicine_id = request.POST.get('medicine')
+        quantity = request.POST.get('quantity')
+        price = request.POST.get('price')
+
+        # ✅ Validation
+        if not medicine_id or not quantity or not price:
+            return render(request, 'create_purchase.html', {
+                'medicines': medicines,
+                'error': 'All fields required'
+            })
+
+        quantity = int(quantity)
+        price = float(price)
+
+        medicine = Medicine.objects.get(id=medicine_id)
+
+        # ✅ Purchase save
+        Purchase.objects.create(
+            medicine=medicine,
+            quantity=quantity,
+            price=price
+        )
+
+        # ✅ Stock increase
+        medicine.quantity += quantity
+        medicine.save()
+
+        return redirect('create_purchase')
+
+    return render(request, 'create_purchase.html', {'medicines': medicines})
