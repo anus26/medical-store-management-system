@@ -92,11 +92,27 @@ def create_purchase(request):
             quantity=quantity,
             price=price
         )
-
         # ✅ Stock increase
         medicine.quantity += quantity
         medicine.save()
 
-        return redirect('create_purchase')
+        return render(request,'purchase_invoice.html', {
+            'medicine': medicine,
+            'quantity': quantity,
+            'price': price,
+            'total': price * quantity
+    })
 
     return render(request, 'create_purchase.html', {'medicines': medicines})
+
+    
+    # update medicine
+def update_medicine(request, id):
+    medicine = Medicine.objects.get(id=id)
+    form = MedicineForm(request.POST or None, instance=medicine)
+
+    if form.is_valid():
+        form.save()
+        return redirect('home')
+
+    return render(request, 'update_medicine.html', {'form': form})

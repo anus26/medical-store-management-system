@@ -16,9 +16,11 @@
         <td>{{m.category}}</td>
         <td>{{m.quantity}}</td>
         <td>{{m.expiry_date}}</td>
+        <td>
+            <a href="{% url 'update_medicine' id=m.id %}">Update</a>
+        </td>
     </tr>
 {% endfor %}
-
 </table>
 <!-- <a href="/invoices">Invoices</a> -->
 
