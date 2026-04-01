@@ -1,3 +1,5 @@
+from urllib import request
+
 from django.shortcuts import render, redirect
 
 from .models import Medicine, Sale,Purchase
@@ -68,9 +70,10 @@ def invoices(request):
 
 def create_purchase(request):
     medicines = Medicine.objects.all()
-
+  
     if request.method == "POST":
         medicine_id = request.POST.get('medicine')
+        medicine_name=request.POST.get('medicine_name')
         quantity = request.POST.get('quantity')
         price = request.POST.get('price')
 
@@ -80,13 +83,23 @@ def create_purchase(request):
                 'medicines': medicines,
                 'error': 'All fields required'
             })
-
+        
         quantity = int(quantity)
         price = float(price)
+        if medicine_id:
+            medicine = Medicine.objects.get(id=medicine_id)
+        elif medicine_name:
+            medicine=Medicine.objects.create(
+                name=medicine_name,
+                quantity=0,
+                price=price,
+            )
+        else:
+            return render(request, 'create_purchase.html', {
+                'medicines': medicines,
+                'error': 'Select or enter medicine'
+            })
 
-        medicine = Medicine.objects.get(id=medicine_id)
-
-        # ✅ Purchase save
         Purchase.objects.create(
             medicine=medicine,
             quantity=quantity,
@@ -101,7 +114,7 @@ def create_purchase(request):
             'quantity': quantity,
             'price': price,
             'total': price * quantity
-    })
+        })
 
     return render(request, 'create_purchase.html', {'medicines': medicines})
 
@@ -116,3 +129,16 @@ def update_medicine(request, id):
         return redirect('home')
 
     return render(request, 'update_medicine.html', {'form': form})
+
+    # delete medicine
+def delete_medicine(request, id):
+    medicine=Medicine.objects.get(id=id)
+
+    if request.method=='POST':
+        medicine.delete()
+        return redirect('home')
+
+    return render(request,'delete_medicine.html',{'medicine':medicine})
+
+
+

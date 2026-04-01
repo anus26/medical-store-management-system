@@ -4,8 +4,10 @@
     {% csrf_token %}
 
     <label>Medicine:</label>
+    <input type="text" placeholder="new Medicine" name="medicine">
     <select name="medicine">
         {% for m in medicines %}
+        
         <option value="{{ m.id }}">
             {{ m.name }} | Current Stock: {{ m.quantity }}
         </option>
