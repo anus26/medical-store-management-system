@@ -140,5 +140,17 @@ def delete_medicine(request, id):
 
     return render(request,'delete_medicine.html',{'medicine':medicine})
 
+def profit(request,id):
+    medicine=Medicine.objects.get(id=id)
+    purchase=Purchase.objects.filter(medicine=medicine).last()
+    sale=Sale.objects.filter(medicine=medicine).last()
 
+    if purchase and sale:
+        profit=sale.total_price-(purchase.price * sale.quantity)
+    else:
+        profit=0
 
+    return render(request,'profit.html',{
+        'medicine':medicine,
+        'profit':profit
+    })

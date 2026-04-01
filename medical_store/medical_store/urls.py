@@ -17,7 +17,7 @@
 
 from django.contrib import admin
 from django.urls import path
-from pharmacy.views import delete_medicine, invoices,create_sale,create_purchase, home,add_medicine, update_medicine
+from pharmacy.views import delete_medicine, invoices,create_sale,create_purchase, home,add_medicine, update_medicine,profit
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -27,6 +27,7 @@ urlpatterns = [
     path('invoices/', invoices, name='invoices'),
     path('create_purchase/',create_purchase, name='create_purchase'),
     path('update_medicine/<int:id>/',update_medicine,name='update_medicine'),
-    path('delete_medicine/<int:id>/',delete_medicine,name='delete_medicine')
+    path('delete_medicine/<int:id>/',delete_medicine,name='delete_medicine'),
+    path('profit/<int:id>/',profit,name='profit' )
     
 ]

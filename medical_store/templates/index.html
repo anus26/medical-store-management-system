@@ -22,6 +22,11 @@
         <td>
             <a href="{% url 'delete_medicine' id=m.id %}">Delete</a>
         </td>
+        <td>
+
+    <a href="{% url 'profit' id=m.id %}">View Profit</a>
+</td>
+
     </tr>
 {% endfor %}
 </table>
@@ -40,6 +45,15 @@
     <li>{{ s.name }} (Stock: {{ s.quantity }})</li>
     {% endfor %}
 </ul>
+
+
+{% for m in medicine %}
+<td>
+
+    <a href="{% url 'profit' id=m.id %}">View Profit</a>
+</td>
+{% endfor %}
+
 {% if m.quantity < 10 %}
 <td style="color:red;">Low Stock</td>
 {% endif %}
