@@ -10,10 +10,20 @@ def home(request):
     medicines=Medicine.objects.all()
     tablets=Medicine.objects.filter(category='Tablets')
     syrups=Medicine.objects.filter(category='syrup')
+    purchase=Purchase.objects.all()
+    sales=Sale.objects.all()
+
+    totalProfit=0
+    for sale in sales:
+        purchase=Purchase.objects.filter(medicine=sale.medicine).last()
+        if purchase:
+            profit=sale.total_price-(purchase.price*sale.quantity)
+            totalProfit+=profit
     return render(request, 'index.html',
                 { 'medicines':medicines,
                  'tablets':tablets,
-                 'syrups':syrups}
+                 'syrups':syrups,
+                 'totalProfit':totalProfit}
                   )
 
 
@@ -154,3 +164,19 @@ def profit(request,id):
         'medicine':medicine,
         'profit':profit
     })
+
+# def home(request):
+#     # medicine=Medicine.objects.all()
+#     purchase=Purchase.objects.all()
+#     sales=Sale.objects.all()
+
+#     totalProfit=0
+#     for sale in sales:
+#         purchase=Purchase.objects.filter(medicine=sale.medicine).last()
+#         if purchase:
+#             profit=sale.total_price-(purchase.price*sale.quantity)
+#             totalProfit+=profit
+#     return render(request,'index.html',
+#                    {
+#                 # 'medicine':medicine,
+#                    'totalProfit':totalProfit})

@@ -47,12 +47,8 @@
 </ul>
 
 
-{% for m in medicine %}
-<td>
 
-    <a href="{% url 'profit' id=m.id %}">View Profit</a>
-</td>
-{% endfor %}
+<h4>TotalProfit :{{totalProfit}}</h4>
 
 {% if m.quantity < 10 %}
 <td style="color:red;">Low Stock</td>
