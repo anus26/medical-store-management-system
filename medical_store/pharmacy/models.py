@@ -1,10 +1,21 @@
 from django.db import models
 
+class Supplier(models.Model):
+    name=models.CharField(max_length=100)
+    contact=models.CharField(max_length=20)
+    address=models.TextField()
+    companyname=models.CharField(max_length=150)
+    email=models.EmailField()
+    created_at=models.DateTimeField(auto_now_add=True)
+    def __str__(self):
+        return self.name
+
 class Medicine(models.Model):
     name=models.CharField(max_length=100)
     category=models.CharField(max_length=100)
     price=models.FloatField()
     quantity=models.IntegerField()
+    supplier=models.ForeignKey(Supplier, on_delete=models.CASCADE)
     expiry_date=models.DateField()
 
     def __str__(self):
@@ -15,16 +26,10 @@ class Purchase(models.Model):
     quantity = models.IntegerField()
     price = models.FloatField()
     date = models.DateTimeField(auto_now_add=True)
+    supplier=models.ForeignKey(Supplier,on_delete=models.CASCADE)
 
     def __str__(self):
         return self.medicine.name  
-
-class Supplier(models.Model):
-    name=models.CharField(max_length=100)
-    contact=models.CharField(max_length=20)
-    address=models.TextField()
-    def __str__(self):
-        return self.name
     
 class Sale(models.Model):
     medicine=models.ForeignKey(Medicine,on_delete=models.CASCADE)
@@ -36,3 +41,4 @@ class Sale(models.Model):
         self.medicine.quantity-=self.quantity
         self.medicine.save()
         super().save(*args,**kwargs)
+

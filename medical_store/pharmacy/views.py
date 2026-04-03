@@ -2,7 +2,7 @@ from urllib import request
 
 from django.shortcuts import render, redirect
 
-from .models import Medicine, Sale,Purchase
+from .models import Medicine, Sale,Purchase,Supplier
 from .forms import MedicineForm
 
 
@@ -86,11 +86,13 @@ def create_purchase(request):
         medicine_name=request.POST.get('medicine_name')
         quantity = request.POST.get('quantity')
         price = request.POST.get('price')
+        supplier_id=request.POST.get('supplier')
 
         # ✅ Validation
         if not medicine_id or not quantity or not price:
             return render(request, 'create_purchase.html', {
                 'medicines': medicines,
+                'suppliers':supplier,
                 'error': 'All fields required'
             })
         
@@ -98,22 +100,27 @@ def create_purchase(request):
         price = float(price)
         if medicine_id:
             medicine = Medicine.objects.get(id=medicine_id)
+            supplier = Supplier.objects.get(id=supplier_id)
         elif medicine_name:
+            supplier = Supplier.objects.get(id=supplier_id)
             medicine=Medicine.objects.create(
                 name=medicine_name,
                 quantity=0,
                 price=price,
+                supplier=supplier
             )
         else:
             return render(request, 'create_purchase.html', {
                 'medicines': medicines,
+                'suppliers':supplier
                 'error': 'Select or enter medicine'
             })
 
         Purchase.objects.create(
             medicine=medicine,
             quantity=quantity,
-            price=price
+            price=price,
+            supplier=supplier
         )
         # ✅ Stock increase
         medicine.quantity += quantity
@@ -123,10 +130,13 @@ def create_purchase(request):
             'medicine': medicine,
             'quantity': quantity,
             'price': price,
-            'total': price * quantity
+            'total': price * quantity,
+
         })
 
-    return render(request, 'create_purchase.html', {'medicines': medicines})
+    return render(request, 'create_purchase.html', {
+        'medicines': medicines,
+        'suppliers':supplier})
 
     
     # update medicine
@@ -164,6 +174,29 @@ def profit(request,id):
         'medicine':medicine,
         'profit':profit
     })
+
+
+
+def supplier(request):
+    if request.method == "POST":
+        name = request.POST.get('name')
+        email = request.POST.get('email')
+        contact = request.POST.get('contact')
+        companyname = request.POST.get('companyname')
+        address = request.POST.get('address')
+
+        # Save to database
+        Supplier.objects.create(
+            name=name,
+            email=email,
+            contact=contact,
+            companyname=companyname,
+            address=address
+        )
+
+        return redirect('supplier')  # page refresh
+
+    return render(request, 'supplier.html')
 
 # def home(request):
 #     # medicine=Medicine.objects.all()
