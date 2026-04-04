@@ -1,0 +1,25 @@
+<h2>Supplier Transactions Report</h2>
+ 
+<table border="1">
+        <tr>
+        <th>Supplier</th>
+        <th>Medicine</th>
+        <th>Quantity</th>
+        <th>Total</th>
+        <th>Payment Method</th>
+        <th>Status</th>
+        <th>Date</th>
+    </tr>
+    {% for p in purchase %}
+    <tr>
+    <td>{{ p.supplier.name}}</td>
+         <td>{{ p.medicine.name }}</td>
+        <td>{{ p.quantity }}</td>
+        <td>{{ p.total_amount }}</td>
+        <td>{{ p.payment_method }}</td>
+        <td>{{ p.payment_status }}</td>
+        <td>{{ p.date }}</td>
+
+    </tr>
+    {% endfor %}
+</table>

@@ -80,65 +80,78 @@ def invoices(request):
 
 def create_purchase(request):
     medicines = Medicine.objects.all()
-  
+    suppliers = Supplier.objects.all()
+
     if request.method == "POST":
-        medicine_id = request.POST.get('medicine')
-        medicine_name=request.POST.get('medicine_name')
+        medicine_id = request.POST.get('medicine_id')
+        medicine_name = request.POST.get('medicine_name')
         quantity = request.POST.get('quantity')
         price = request.POST.get('price')
-        supplier_id=request.POST.get('supplier')
-
-        # ✅ Validation
-        if not medicine_id or not quantity or not price:
+        supplier_id = request.POST.get('supplier')  # ✅ FIXED
+        expiry_date = request.POST.get('expiry_date')
+        if not quantity or not price or not supplier_id:
             return render(request, 'create_purchase.html', {
                 'medicines': medicines,
-                'suppliers':supplier,
+                'suppliers': suppliers,
                 'error': 'All fields required'
             })
-        
+
         quantity = int(quantity)
         price = float(price)
+
+        supplier = Supplier.objects.get(id=supplier_id)
+
         if medicine_id:
             medicine = Medicine.objects.get(id=medicine_id)
-            supplier = Supplier.objects.get(id=supplier_id)
+
         elif medicine_name:
-            supplier = Supplier.objects.get(id=supplier_id)
-            medicine=Medicine.objects.create(
+            medicine = Medicine.objects.create(
                 name=medicine_name,
                 quantity=0,
                 price=price,
-                supplier=supplier
+                supplier=supplier,
+                expiry_date=expiry_date
             )
         else:
             return render(request, 'create_purchase.html', {
                 'medicines': medicines,
-                'suppliers':supplier
+                'suppliers': suppliers,
                 'error': 'Select or enter medicine'
             })
+        payment_method=request.POST.get('payment_method')
+        payment_status=request.POST.get('payment_status')
 
         Purchase.objects.create(
             medicine=medicine,
+            supplier=supplier,  # ⚠️ ye missing tha
             quantity=quantity,
             price=price,
-            supplier=supplier
+            expiry_date=expiry_date,
+            payment_method=payment_method,
+    payment_status=payment_status
         )
-        # ✅ Stock increase
+
+        # stock update
         medicine.quantity += quantity
         medicine.save()
 
-        return render(request,'purchase_invoice.html', {
+        return render(request, 'purchase_invoice.html', {
             'medicine': medicine,
             'quantity': quantity,
             'price': price,
-            'total': price * quantity,
-
+            'total': price * quantity
         })
 
     return render(request, 'create_purchase.html', {
         'medicines': medicines,
-        'suppliers':supplier})
+        'suppliers': suppliers
+    }) 
+def supplier_report(request):
+    purchase=Purchase.objects.select_related('supplier').all()
+    return render(request,'supplier_report.html',{
+        'purchase':purchase
+    })
 
-    
     # update medicine
 def update_medicine(request, id):
     medicine = Medicine.objects.get(id=id)
@@ -197,6 +210,14 @@ def supplier(request):
         return redirect('supplier')  # page refresh
 
     return render(request, 'supplier.html')
+
+
+
+def supplier_report(request):
+    purchase=Purchase.objects.select_related('supplier').all()
+    return render(request,'supplier_report.html',{
+        'purchase':purchase
+    })
 
 # def home(request):
 #     # medicine=Medicine.objects.all()

@@ -3,32 +3,54 @@
 <form method="POST">
     {% csrf_token %}
 
-    <label>Medicine:</label>
-    <input type="text" placeholder="new Medicine" name="medicine">
-    <select name="medicine">
+    <!-- New Medicine -->
+    <label>New Medicine (optional):</label>
+    <input type="text" placeholder="Enter new medicine" name="medicine_name">
+
+    <!-- Select Existing Medicine -->
+    <label>Select Medicine:</label>
+    <select name="medicine_id">
+        <option value="">-- Select Medicine --</option>
         {% for m in medicines %}
-        
-        <option value="{{ m.id }}">
-            {{ m.name }} | Current Stock: {{ m.quantity }}
-        </option>
+            <option value="{{ m.id }}">
+                {{ m.name }} | Stock: {{ m.quantity }}
+            </option>
         {% endfor %}
     </select>
 
+    <!-- Quantity -->
     <label>Quantity:</label>
     <input type="number" name="quantity" required>
 
+    <!-- Price -->
     <label>Price:</label>
     <input type="number" step="0.01" name="price" required>
-    <label >supplier</label>
-<select name="supplier">
-    {% for s in suppliers %}
-        <option value="{{ s.id }}">{{ s.name }}</option>
-    {% endfor %}
-</select>
+ <label>Expiry Date:</label>
+<input type="date" name="expiry_date" required>
+    <!-- Supplier -->
+    <label>Supplier:</label>
+    <select name="supplier">
+        <option value="">-- Select Supplier --</option>
+        {% for s in suppliers %}
+            <option value="{{ s.id }}">{{ s.name }}</option>
+        {% endfor %}
+    </select>
+   
+    <label >Payment Method:</label>
+    <select name="payment_method" >
+        <option value="cash">Cash</option>
+        <option value="card">Card</option>
+        <option value="online">Online</option>
+    </select>
 
+<label>Payment Status:</label>
+<select name="payment_status">
+    <option value="paid">Paid</option>
+    <option value="pending">Pending</option>
+</select>
     <button type="submit">Add Purchase</button>
 
     {% if error %}
-    <p style="color:red;">{{ error }}</p>
+        <p style="color:red;">{{ error }}</p>
     {% endif %}
 </form>
