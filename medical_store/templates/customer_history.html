@@ -1,0 +1,19 @@
+<h2>{{ customer.name }} Purchase History</h2>
+
+<table border="1">
+    <tr>
+        <th>Medicine</th>
+        <th>Quantity</th>
+        <th>Total Price</th>
+        <th>Date</th>
+    </tr>
+
+    {% for s in sales %}
+    <tr>
+        <td>{{ s.medicine.name }}</td>
+        <td>{{ s.quantity }}</td>
+        <td>{{ s.total_price }}</td>
+        <td>{{ s.date }}</td>
+    </tr>
+    {% endfor %}
+</table>

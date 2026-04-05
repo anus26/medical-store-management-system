@@ -1,0 +1,29 @@
+<h2>Customer List</h2>
+
+<table border="1" cellpadding="10">
+    <tr>
+        <th>ID</th>
+        <th>Name</th>
+        <th>Contact</th>
+        <th>Address</th>
+        <th>Actions</th>
+    </tr>
+
+    {% for c in customers %}
+    <tr>
+        <td>{{ c.id }}</td>
+        <td>{{ c.name }}</td>
+        <td>{{ c.contact }}</td>
+        <td>{{ c.address }}</td>
+        <td>
+            <a href="{% url 'customer_history' c.id %}">History</a> |
+  <form action="{% url 'delete_customer' c.id %}" method="POST" style="display:inline;">
+    {% csrf_token %}
+    <button type="submit" onclick="return confirm('Delete this customer?')">
+        Delete
+    </button>
+</form>
+        </td>
+    </tr>
+    {% endfor %}
+</table>

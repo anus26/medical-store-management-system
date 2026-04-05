@@ -1,8 +1,13 @@
-from urllib import request
+
+
 
 from django.shortcuts import render, redirect
 
-from .models import Medicine, Sale,Purchase,Supplier
+from .models import Medicine, Sale,Purchase,Supplier,Customer
+
+from django.contrib.auth.models import Group,User
+from django.contrib.auth import authenticate, login
+from django.contrib.auth.decorators import login_required
 from .forms import MedicineForm
 
 
@@ -55,10 +60,13 @@ def create_sale(request):
         # ✅ STOCK DECREASE
         medicine.quantity -= quantity
         medicine.save()
+        customer_id = request.POST.get('customer')
+        customer = Customer.objects.get(id=customer_id)
 
         # Sale save karo
         Sale.objects.create(
             medicine=medicine,
+            customer=customer,
             quantity=quantity,
             total_price=total_price
         )
@@ -219,18 +227,114 @@ def supplier_report(request):
         'purchase':purchase
     })
 
-# def home(request):
-#     # medicine=Medicine.objects.all()
-#     purchase=Purchase.objects.all()
-#     sales=Sale.objects.all()
 
-#     totalProfit=0
-#     for sale in sales:
-#         purchase=Purchase.objects.filter(medicine=sale.medicine).last()
-#         if purchase:
-#             profit=sale.total_price-(purchase.price*sale.quantity)
-#             totalProfit+=profit
-#     return render(request,'index.html',
-#                    {
-#                 # 'medicine':medicine,
-#                    'totalProfit':totalProfit})
+def add_customer(request):
+    if request.method == "POST":
+        name = request.POST.get('name')
+        contact = request.POST.get('contact')
+        address = request.POST.get('address')
+
+        Customer.objects.create(
+            name=name,
+            contact=contact,
+            address=address
+        )
+
+        return redirect('customer_list')
+
+    return render(request, 'add_customer.html')
+
+
+
+def customer_list(request):
+    customers=Customer.objects.all().order_by('-id')
+    return render(request,'customer_list.html',{
+        'customers':customers
+    })
+
+
+def customer_history(request, id):
+    customer = Customer.objects.get(id=id)
+    sales = Sale.objects.filter(customer=customer)
+
+    return render(request, 'customer_history.html', {
+        'customer': customer,
+        'sales': sales
+    })
+
+def delete_customer(request, id):
+    customer = Customer.objects.get(id=id)
+    customer.delete()
+    return redirect('customer_list')   # ✅ always return
+    
+
+def add_user(request):
+    if request.method == "POST":
+        username = request.POST.get('username')
+        password = request.POST.get('password')
+        email = request.POST.get('email')
+        role = request.POST.get('role')   
+
+        # ✅ user ko variable me store karo
+        user = User.objects.create_user(
+            username=username,
+            password=password,
+            email=email
+        )
+
+        # ✅ group assign karo
+        group, created = Group.objects.get_or_create(name=role)
+        user.groups.add(group)
+
+        return redirect('login')
+
+    return render(request, 'add_user.html')    
+
+
+
+def user_login(request):
+    if request.method == "POST":
+        username = request.POST.get("username")
+        password = request.POST.get("password")
+
+        user = authenticate(request, username=username, password=password)
+
+        if user is not None:
+            login(request, user)
+
+            # ✅ DEBUG (optional)
+            print(user.groups.all())
+
+            # ✅ ROLE BASED REDIRECT
+            if user.groups.filter(name="Admin").exists():
+                return redirect("admin_dashboard")
+
+            elif user.groups.filter(name="Staff").exists():
+                return redirect("staff_dashboard")
+
+            else:
+                return redirect("login")  # fallback
+
+        else:
+            return render(request, "login.html", {
+                "error": "Invalid username or password"
+            })
+
+    return render(request, "login.html")
+
+
+
+
+@login_required
+def admin_dashboard(request):
+    if not request.user.groups.filter(name="Admin").exists():
+        return redirect("/login/")
+
+    return render(request, "admin_dashboard.html")
+@login_required
+def staff_dashboard(request):
+    if request.user.groups.filter(name="Staff").exists() or request.user.groups.filter(name="Admin").exists():
+        return render(request, "staff_dashboard.html")
+
+    return redirect("/login/")
+

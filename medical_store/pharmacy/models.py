@@ -1,5 +1,6 @@
 from django.db import models
 
+
 class Supplier(models.Model):
     name=models.CharField(max_length=100)
     contact=models.CharField(max_length=20)
@@ -47,6 +48,7 @@ class Purchase(models.Model):
     
 class Sale(models.Model):
     medicine=models.ForeignKey(Medicine,on_delete=models.CASCADE)
+    customer=models.ForeignKey('Customer',on_delete=models.CASCADE)
     quantity=models.IntegerField()
     total_price=models.FloatField()
     data=models.DateField(auto_now_add=True)    
@@ -55,4 +57,14 @@ class Sale(models.Model):
         self.medicine.quantity-=self.quantity
         self.medicine.save()
         super().save(*args,**kwargs)
+
+class Customer(models.Model):
+    name = models.CharField(max_length=100)
+    contact = models.CharField(max_length=20)
+    address = models.TextField(blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.name
+
 

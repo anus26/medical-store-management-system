@@ -1,0 +1,11 @@
+<h2>Add Customer</h2>
+
+<form method="POST">
+    {% csrf_token %}
+
+    <input type="text" name="name" placeholder="Customer Name" required>
+    <input type="text" name="contact" placeholder="Contact" required>
+    <textarea name="address" placeholder="Address"></textarea>
+
+    <button type="submit">Add Customer</button>
+</form>
