@@ -7,7 +7,7 @@ from .models import Medicine, Sale,Purchase,Supplier,Customer
 
 from django.contrib.auth.models import Group,User
 from django.contrib.auth import authenticate, login
-from django.contrib.auth.decorators import login_required
+
 from .forms import MedicineForm
 
 
@@ -273,7 +273,7 @@ def add_user(request):
         username = request.POST.get('username')
         password = request.POST.get('password')
         email = request.POST.get('email')
-        role = request.POST.get('role')   
+        group = request.POST.get('group')   
 
         # ✅ user ko variable me store karo
         user = User.objects.create_user(
@@ -283,7 +283,7 @@ def add_user(request):
         )
 
         # ✅ group assign karo
-        group, created = Group.objects.get_or_create(name=role)
+        group, created = Group.objects.get_or_create(name=group)
         user.groups.add(group)
 
         return redirect('login')
@@ -325,13 +325,13 @@ def user_login(request):
 
 
 
-@login_required
+
 def admin_dashboard(request):
     if not request.user.groups.filter(name="Admin").exists():
         return redirect("/login/")
 
     return render(request, "admin_dashboard.html")
-@login_required
+
 def staff_dashboard(request):
     if request.user.groups.filter(name="Staff").exists() or request.user.groups.filter(name="Admin").exists():
         return render(request, "staff_dashboard.html")
