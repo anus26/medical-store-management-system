@@ -273,7 +273,7 @@ def add_user(request):
         username = request.POST.get('username')
         password = request.POST.get('password')
         email = request.POST.get('email')
-        group = request.POST.get('group')   
+        group_name = request.POST.get('group')   
 
         # ✅ user ko variable me store karo
         user = User.objects.create_user(
@@ -283,8 +283,10 @@ def add_user(request):
         )
 
         # ✅ group assign karo
-        group, created = Group.objects.get_or_create(name=group)
-        user.groups.add(group)
+        group_name = request.POST.get('group')
+
+        group_obj, created = Group.objects.get_or_create(name=group_name)
+        user.groups.add(group_obj)
 
         return redirect('login')
 
@@ -329,8 +331,23 @@ def user_login(request):
 def admin_dashboard(request):
     if not request.user.groups.filter(name="Admin").exists():
         return redirect("/login/")
+    medicines=Medicine.objects.all()
+    tablets=Medicine.objects.filter(category='Tablets')
+    syrups=Medicine.objects.filter(category='syrup')
+    purchase=Purchase.objects.all()
+    sales=Sale.objects.all()
 
-    return render(request, "admin_dashboard.html")
+    totalProfit=0
+    for sale in sales:
+      if purchase:
+            profit=sale.total_price-(purchase.price*sale.quantity)
+            totalProfit+=profit
+    return render(request, "admin_dashboard.html",
+           { 'medicines':medicines,
+                 'tablets':tablets,
+                 'syrups':syrups,
+                 'totalProfit':totalProfit}
+                  )
 
 def staff_dashboard(request):
     if request.user.groups.filter(name="Staff").exists() or request.user.groups.filter(name="Admin").exists():

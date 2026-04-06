@@ -1,4 +1,37 @@
-<h2>Welcome Admin 👑</h2>
+<h2>Welcome Admin </h2>
 
-<a href="/add-medicine/">Add Medicine</a>
-<a href="/profit/">View Profit</a>
+<a href="/add_medicine/">Add Medicine</a>
+<a href="/create_purchase/">Purchase</a>
+<a href="/supplier/">Supplier</a>
+   <h3>All Medicines</h3>
+<table border="1">
+    <tr>
+        <th>Name</th>
+        <th>Category</th>
+        <th>Quantity</th>
+        <th>Expiry</th>
+    </tr>
+    {% for m in medicines %}
+  <tr>
+    <td>{{m.name}}</td>
+    <td>{{m.category}}</td>
+    <td>{{m.quantity}}</td>
+    <td>{{m.expiry_date}}</td>
+    
+    <td>
+        <a href="{% url 'update_medicine' id=m.id %}">Update</a>
+    </td>
+    
+    <td>
+        <a href="{% url 'delete_medicine' id=m.id %}">Delete</a>
+    </td>
+    
+    <td>
+        <a href="{% url 'profit' id=m.id %}">View Profit</a>
+    </td>
+</tr>
+{% endfor %}
+</table>
+
+
+<h4>TotalProfit :{{totalProfit}}</h4>
