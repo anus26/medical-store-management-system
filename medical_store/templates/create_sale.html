@@ -12,7 +12,8 @@
             {{ m.name }} | Stock: {{ m.quantity }} | Exp: {{ m.expiry_date }}
         </option>
         {% endfor %}
-    </select><label>Customer:</label>
+    </select>
+    <label>Customer:</label>
 <select name="customer">
     {% for c in customers %}
         <option value="{{ c.id }}">{{ c.name }}</option>

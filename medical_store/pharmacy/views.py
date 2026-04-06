@@ -43,7 +43,7 @@ def add_medicine(request):
 
 def create_sale(request):
     medicines = Medicine.objects.all()   # 👈 sab medicines fetch karo
-
+    customers = Customer.objects.all()
     if request.method == "POST":
         medicine_id = request.POST.get('medicine')
         quantity = int(request.POST.get('quantity'))
@@ -52,6 +52,7 @@ def create_sale(request):
         if quantity > medicine.quantity:
             return render(request, 'create_sale.html', {
                 'medicines': medicines,
+                'customers': customers, 
                 'error': "Not enough stock!"
             })
 
@@ -75,11 +76,12 @@ def create_sale(request):
         return render(request, 'invoices.html', {
             'medicine': medicine,
             'quantity': quantity,
-            'total': total_price
+            'total': total_price,
+            'customers':customers
         })
 
     # GET request → form show karo
-    return render(request, 'create_sale.html', {'medicines': medicines})
+    return render(request, 'create_sale.html', {'medicines': medicines,'customers':customers})
 def invoices(request):
     sales = Sale.objects.all()
     return render(request, 'invoices.html', {'sales': sales})
@@ -351,7 +353,10 @@ def admin_dashboard(request):
 
 def staff_dashboard(request):
     if request.user.groups.filter(name="Staff").exists() or request.user.groups.filter(name="Admin").exists():
-        return render(request, "staff_dashboard.html")
+        sales=Sale.objects.all()
+        return render(request, "staff_dashboard.html",{
+            'sales':sales
+        })
 
     return redirect("/login/")
 
