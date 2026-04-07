@@ -1,9 +1,25 @@
-<h2>Invoices</h2>
-<p>Medicine: {{ medicine.name }}</p>
-<p>Price: {{ medicine.price }}</p>
-<p>Quantity: {{ quantity }}</p>
-<p>Total: {{ total }}</p>
-<button onclick="window.print()">Print</button>
+<h2>Invoice</h2>
+
+<p>Customer: {{ invoice.customer.name }}</p>
+
+<table border="1">
+<tr>
+    <th>Medicine</th>
+    <th>Qty</th>
+    <th>Price</th>
+</tr>
+
+{% for item in items %}
+<tr>
+    <td>{{ item.medicine.name }}</td>
+    <td>{{ item.quantity }}</td>
+    <td>{{ item.total_price }}</td>
+</tr>
+{% endfor %}
+
+</table>
+
+<h3>Total: {{ total }}</h3>
 
 
 

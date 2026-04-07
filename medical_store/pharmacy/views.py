@@ -1,9 +1,11 @@
 
 
 
+from statistics import quantiles
+
 from django.shortcuts import render, redirect
 
-from .models import Medicine, Sale,Purchase,Supplier,Customer
+from .models import Invoice, Medicine, Sale,Purchase,Supplier,Customer
 
 from django.contrib.auth.models import Group,User
 from django.contrib.auth import authenticate, login
@@ -41,50 +43,61 @@ def add_medicine(request):
 
     return render(request, 'add_medicine.html', {'form': form})
 
-def create_sale(request):
-    medicines = Medicine.objects.all()   # 👈 sab medicines fetch karo
-    customers = Customer.objects.all()
-    if request.method == "POST":
-        medicine_id = request.POST.get('medicine')
-        quantity = int(request.POST.get('quantity'))
 
-        medicine = Medicine.objects.get(id=medicine_id)
-        if quantity > medicine.quantity:
-            return render(request, 'create_sale.html', {
-                'medicines': medicines,
-                'customers': customers, 
-                'error': "Not enough stock!"
-            })
-
-        total_price = medicine.price * quantity
-
-        # ✅ STOCK DECREASE
-        medicine.quantity -= quantity
-        medicine.save()
-        customer_id = request.POST.get('customer')
-        customer = Customer.objects.get(id=customer_id)
-
-        # Sale save karo
-        Sale.objects.create(
-            medicine=medicine,
-            customer=customer,
-            quantity=quantity,
-            total_price=total_price
-        )
-
-        # Invoice page
-        return render(request, 'invoices.html', {
-            'medicine': medicine,
-            'quantity': quantity,
-            'total': total_price,
-            'customers':customers
-        })
-
-    # GET request → form show karo
-    return render(request, 'create_sale.html', {'medicines': medicines,'customers':customers})
 def invoices(request):
     sales = Sale.objects.all()
     return render(request, 'invoices.html', {'sales': sales})
+
+def create_sale(request):
+    medicines = Medicine.objects.all()
+    customers = Customer.objects.all()
+
+    if request.method == "POST":
+        medicine_ids = request.POST.getlist('medicine')
+        quantities = request.POST.getlist('quantity')
+        customer_id = request.POST.get('customer')
+
+        customer = Customer.objects.get(id=customer_id)
+
+        # create invoice
+        invoice = Invoice.objects.create(customer=customer)
+
+        total_bill = 0
+
+        for med_id, qty in zip(medicine_ids, quantities):
+            qty = int(qty)
+            medicine = Medicine.objects.get(id=med_id)
+
+            # stock check
+            if qty > medicine.quantity:
+                return render(request, 'create_sale.html', {
+                    'medicines': medicines,
+                    'customers': customers,
+                    'error': f"Not enough stock for {medicine.name}"
+                })
+
+            price = medicine.price * qty
+            total_bill += price
+
+            # ❗ NOTE: stock decrease model me ho raha hai
+            Sale.objects.create(
+                invoice=invoice,
+                medicine=medicine,
+                customer=customer,
+                quantity=qty,
+                total_price=price
+            )
+
+        return render(request, 'invoices.html', {
+            'invoice': invoice,
+            'items': invoice.items.all(),
+            'total': total_bill
+        })
+
+    return render(request, 'create_sale.html', {
+        'medicines': medicines,
+        'customers': customers
+    })
 
 
 
@@ -333,24 +346,24 @@ def user_login(request):
 def admin_dashboard(request):
     if not request.user.groups.filter(name="Admin").exists():
         return redirect("/login/")
-    medicines=Medicine.objects.all()
-    tablets=Medicine.objects.filter(category='Tablets')
-    syrups=Medicine.objects.filter(category='syrup')
-    purchase=Purchase.objects.all()
-    sales=Sale.objects.all()
 
-    totalProfit=0
+    medicines = Medicine.objects.all()
+    tablets = Medicine.objects.filter(category='Tablets')
+    syrups = Medicine.objects.filter(category='syrup')
+    sales = Sale.objects.all()
+
+    totalProfit = 0
+
     for sale in sales:
-      if purchase:
-            profit=sale.total_price-(purchase.price*sale.quantity)
-            totalProfit+=profit
-    return render(request, "admin_dashboard.html",
-           { 'medicines':medicines,
-                 'tablets':tablets,
-                 'syrups':syrups,
-                 'totalProfit':totalProfit}
-                  )
+        profit = sale.total_price - (sale.medicine.price * sale.quantity)
+        totalProfit += profit
 
+    return render(request, "admin_dashboard.html", {
+        'medicines': medicines,
+        'tablets': tablets,
+        'syrups': syrups,
+        'totalProfit': totalProfit
+    })
 def staff_dashboard(request):
     if request.user.groups.filter(name="Staff").exists() or request.user.groups.filter(name="Admin").exists():
         sales=Sale.objects.all()

@@ -45,8 +45,21 @@ class Purchase(models.Model):
      super().save(*args,**kwargs)
     def __str__(self):
         return self.medicine.name  
+class Customer(models.Model):
+    name = models.CharField(max_length=100)
+    contact = models.CharField(max_length=20)
+    address = models.TextField(blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.name    
+    
+class Invoice(models.Model):
+    customer = models.ForeignKey(Customer, on_delete=models.CASCADE)
+    date = models.DateTimeField(auto_now_add=True)
     
 class Sale(models.Model):
+    invoice=models.ForeignKey(Invoice,on_delete=models.CASCADE,related_name='items')
     medicine=models.ForeignKey(Medicine,on_delete=models.CASCADE)
     customer=models.ForeignKey('Customer',on_delete=models.CASCADE)
     quantity=models.IntegerField()
@@ -58,13 +71,6 @@ class Sale(models.Model):
         self.medicine.save()
         super().save(*args,**kwargs)
 
-class Customer(models.Model):
-    name = models.CharField(max_length=100)
-    contact = models.CharField(max_length=20)
-    address = models.TextField(blank=True, null=True)
-    created_at = models.DateTimeField(auto_now_add=True)
 
-    def __str__(self):
-        return self.name
 
 

@@ -1,57 +1,45 @@
-<h2>Create Sale</h2>
-
 <form method="POST">
     {% csrf_token %}
 
-    <label>Medicine:</label>
-    <input type="text" id="searchmedicine" placeholder="Search medicine...">
-
-    <select name="medicine" id="medicineselect" >
-        {% for m in medicines %}
-        <option value="{{ m.id }}">
-            {{ m.name }} | Stock: {{ m.quantity }} | Exp: {{ m.expiry_date }}
-        </option>
+    <label>Customer:</label>
+    <select name="customer">
+        {% for c in customers %}
+        <option value="{{ c.id }}">{{ c.name }}</option>
         {% endfor %}
     </select>
-    <label>Customer:</label>
-<select name="customer">
-    {% for c in customers %}
-        <option value="{{ c.id }}">{{ c.name }}</option>
-    {% endfor %}
-</select>
 
+    <div id="items">
+        <div class="item">
+            <select name="medicine">
+                {% for m in medicines %}
+                <option value="{{ m.id }}">{{ m.name }}</option>
+                {% endfor %}
+            </select>
 
-    <label>Quantity:</label>
-    <input type="number" name="quantity" required>
+            <input type="number" name="quantity" placeholder="Qty">
+        </div>
+    </div>
 
+    <button type="button" onclick="addItem()">+ Add More</button>
     <button type="submit">Generate Bill</button>
-
-    {% if error %}
-    <p style="color:red;">{{ error }}</p>
-    {% endif %}
 </form>
 
+
 <script>
-    const searchInput = document.getElementById('searchmedicine');
-const select = document.getElementById('medicineselect');
+function addItem() {
+    let div = document.createElement("div");
+    div.classList.add("item");
 
-searchInput.addEventListener('keypress', function () {
+    div.innerHTML = `
+        <select name="medicine">
+            {% for m in medicines %}
+            <option value="{{ m.id }}">{{ m.name }}</option>
+            {% endfor %}
+        </select>
 
-    let filter = this.value.toLowerCase();
-    let options = select.options;
-    let firstMatch=null
+        <input type="number" name="quantity" placeholder="Qty">
+    `;
 
-    for (let i = 0; i < options.length; i++) {
-        let txt = options[i].text.toLowerCase();
-
-        if (txt.includes(filter)) {
-            options[i].hidden = false;
-            if(!firstMatch) firstMatch=options[i]
-        } else {
-            options[i].hidden = true;
-        }
-
-    }
-        if(firstMatch) firstMatch.selected=true;
-});
+    document.getElementById("items").appendChild(div);
+}
 </script>
