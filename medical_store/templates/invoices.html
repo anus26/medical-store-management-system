@@ -1,25 +1,22 @@
-<h2>Invoice</h2>
+<h2>🧾 Latest Invoice</h2>
 
-<p>Customer: {{ invoice.customer.name }}</p>
+{% if current_invoice %}
+    <div style="border:2px solid green; padding:10px; margin-bottom:20px;">
+        <p><b>Customer:</b> {{ current_invoice.customer.name }}</p>
 
-<table border="1">
-<tr>
-    <th>Medicine</th>
-    <th>Qty</th>
-    <th>Price</th>
-</tr>
+        <h4>Items:</h4>
+        <ul>
+            {% for item in current_invoice.items.all %}
+                <li>
+                    {{ item.medicine.name }} -
+                    Qty: {{ item.quantity }} -
+                    Price: {{ item.total_price }}
+                </li>
+            {% endfor %}
+        </ul>
 
-{% for item in items %}
-<tr>
-    <td>{{ item.medicine.name }}</td>
-    <td>{{ item.quantity }}</td>
-    <td>{{ item.total_price }}</td>
-</tr>
-{% endfor %}
-
-</table>
-
-<h3>Total: {{ total }}</h3>
-
-
-
+        <p><b>Subtotal:</b> {{ current_invoice.subtotal }}</p>
+        <p><b>GST:</b> {{ current_invoice.tax }}</p>
+        <h3><b>Total:</b> {{ current_invoice.total }}</h3>
+    </div>
+{% endif %}

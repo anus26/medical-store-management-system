@@ -1,4 +1,5 @@
-<form method="POST">
+<form method="POST" action="{% url 'create_sale' %}">
+    
     {% csrf_token %}
 
     <label>Customer:</label>
@@ -8,38 +9,106 @@
         {% endfor %}
     </select>
 
-    <div id="items">
-        <div class="item">
-            <select name="medicine">
-                {% for m in medicines %}
-                <option value="{{ m.id }}">{{ m.name }}</option>
-                {% endfor %}
-            </select>
+    <br><br>
 
-            <input type="number" name="quantity" placeholder="Qty">
-        </div>
-    </div>
+    <!-- ✅ select OUTSIDE -->
+    <select id="medicineSelect">
+        {% for m in medicines %}
+        <option value="{{ m.id }}" data-price="{{m.price}}">
+            {{ m.name }} - {{ m.price }}
+        </option>
+        {% endfor %}
+    </select>
 
-    <button type="button" onclick="addItem()">+ Add More</button>
+    <input type="number" id="qty" placeholder="qty">
+    <button type="button" onclick="addToCart()">+ Add</button>
+
+    <br><br>
+
+    <table border="1" id="cartTable">
+        <tr>
+            <th>Medicine</th>
+            <th>Qty</th>
+            <th>Price</th>
+            <th>Action</th>
+        </tr>
+    </table>
+
+    <!-- ✅ hidden inputs container -->
+    <div id="hiddenInputs"></div>
+
+    <h3>Subtotal: <span id="subtotal">0</span></h3>
+    <h3>GST (10%): <span id="gst">0</span></h3>
+    <h3>Total: <span id="total">0</span></h3>
+
     <button type="submit">Generate Bill</button>
 </form>
 
 
 <script>
-function addItem() {
-    let div = document.createElement("div");
-    div.classList.add("item");
+let subtotal = 0;
 
-    div.innerHTML = `
-        <select name="medicine">
-            {% for m in medicines %}
-            <option value="{{ m.id }}">{{ m.name }}</option>
-            {% endfor %}
-        </select>
+function addToCart() {
+    let select = document.getElementById("medicineSelect");
+    let qty = document.getElementById('qty').value;
 
-        <input type="number" name="quantity" placeholder="Qty">
+    if (!qty || qty <= 0) {
+        alert("Enter valid quantity");
+        return;
+    }
+
+    let medId = select.value;
+    let medText = select.options[select.selectedIndex].text;
+    let price = parseFloat(select.options[select.selectedIndex].dataset.price);
+
+    let totalPrice = price * qty;
+    subtotal += totalPrice;
+
+    // ✅ add row
+    let table = document.getElementById("cartTable");
+    let row = table.insertRow();
+
+    row.innerHTML = `
+        <td>${medText}</td>
+        <td>${qty}</td>
+        <td>${totalPrice.toFixed(2)}</td>
+        <td><button type="button" onclick="removeItem(this, ${totalPrice})">Remove</button></td>
     `;
 
-    document.getElementById("items").appendChild(div);
+    // ✅ hidden inputs
+    let hiddenDiv = document.getElementById("hiddenInputs");
+
+    let medInput = document.createElement("input");
+    medInput.type = "hidden";
+    medInput.name = "medicine";
+    medInput.value = medId;
+
+    let qtyInput = document.createElement("input");
+    qtyInput.type = "hidden";
+    qtyInput.name = "quantity";
+    qtyInput.value = qty;
+
+  row.appendChild(medInput);
+row.appendChild(qtyInput);
+
+    updateTotals();
+}
+
+function removeItem(btn, price) {
+    let row = btn.parentNode.parentNode;
+    row.remove();
+
+    subtotal -= price;
+
+    updateTotals();
+}
+
+function updateTotals() {
+    let gst = subtotal * 0.10;   // ✅ FIXED
+    let total = subtotal + gst;
+
+    document.getElementById("subtotal").innerText = subtotal.toFixed(2);
+    document.getElementById("gst").innerText = gst.toFixed(2);
+    document.getElementById("total").innerText = total.toFixed(2);
 }
 </script>

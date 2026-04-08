@@ -56,8 +56,10 @@ class Customer(models.Model):
     
 class Invoice(models.Model):
     customer = models.ForeignKey(Customer, on_delete=models.CASCADE)
-    date = models.DateTimeField(auto_now_add=True)
-    
+    date=models.DateTimeField(auto_now_add=True)
+    subtotal=models.FloatField(default=0)
+    tax=models.FloatField(default=0)
+    total=models.FloatField(default=0)
 class Sale(models.Model):
     invoice=models.ForeignKey(Invoice,on_delete=models.CASCADE,related_name='items')
     medicine=models.ForeignKey(Medicine,on_delete=models.CASCADE)

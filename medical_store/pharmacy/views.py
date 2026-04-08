@@ -4,6 +4,7 @@
 from statistics import quantiles
 
 from django.shortcuts import render, redirect
+from django.db import transaction
 
 from .models import Invoice, Medicine, Sale,Purchase,Supplier,Customer
 
@@ -44,9 +45,18 @@ def add_medicine(request):
     return render(request, 'add_medicine.html', {'form': form})
 
 
+
+
+
+
 def invoices(request):
-    sales = Sale.objects.all()
-    return render(request, 'invoices.html', {'sales': sales})
+    invoices = Invoice.objects.all().order_by('-id')
+    current_invoice = invoices.first()   # 👈 latest invoice
+
+    return render(request, 'invoices.html', {
+        'invoices': invoices,
+        'current_invoice': current_invoice
+    })
 
 def create_sale(request):
     medicines = Medicine.objects.all()
@@ -57,50 +67,80 @@ def create_sale(request):
         quantities = request.POST.getlist('quantity')
         customer_id = request.POST.get('customer')
 
+        if not customer_id:
+            return render(request, 'create_sale.html', {
+                'medicines': medicines,
+                'customers': customers,
+                'error': "Customer required"
+            })
+
         customer = Customer.objects.get(id=customer_id)
 
-        # create invoice
-        invoice = Invoice.objects.create(customer=customer)
-
-        total_bill = 0
+        subtotal = 0   # ✅ FIXED
+        sale_items = []
 
         for med_id, qty in zip(medicine_ids, quantities):
+
+            if not qty:
+                continue
+
             qty = int(qty)
             medicine = Medicine.objects.get(id=med_id)
 
-            # stock check
             if qty > medicine.quantity:
                 return render(request, 'create_sale.html', {
                     'medicines': medicines,
                     'customers': customers,
-                    'error': f"Not enough stock for {medicine.name}"
+                    'error': f"{medicine.name} out of stock"
                 })
 
-            price = medicine.price * qty
-            total_bill += price
+            total_price = medicine.price * qty
+            subtotal += total_price
 
-            # ❗ NOTE: stock decrease model me ho raha hai
-            Sale.objects.create(
-                invoice=invoice,
-                medicine=medicine,
+            sale_items.append({
+                'medicine': medicine,
+                'quantity': qty,
+                'total_price': total_price
+            })
+
+        if not sale_items:
+            return render(request, 'create_sale.html', {
+                'error': "No items selected",
+                'medicines': medicines,
+                'customers': customers
+            })
+
+        tax = subtotal * 0.10
+        total = subtotal + tax
+
+        with transaction.atomic():
+
+            invoice = Invoice.objects.create(
                 customer=customer,
-                quantity=qty,
-                total_price=price
+                subtotal=subtotal,
+                tax=tax,
+                total=total
             )
 
-        return render(request, 'invoices.html', {
-            'invoice': invoice,
-            'items': invoice.items.all(),
-            'total': total_bill
-        })
+            for item in sale_items:   # ✅ FIXED
+                Sale.objects.create(
+                    invoice=invoice,
+                    medicine=item['medicine'],
+                    customer=customer,
+                    quantity=item['quantity'],
+                    total_price=item['total_price']
+                )
+
+                # ✅ stock update inside loop
+                item['medicine'].quantity -= item['quantity']
+                item['medicine'].save()
+
+        return redirect('invoices')
 
     return render(request, 'create_sale.html', {
         'medicines': medicines,
         'customers': customers
     })
-
-
-
 def create_purchase(request):
     medicines = Medicine.objects.all()
     suppliers = Supplier.objects.all()
