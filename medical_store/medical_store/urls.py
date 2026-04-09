@@ -19,7 +19,7 @@ from django.contrib import admin
 from django.urls import path
 
 
-from pharmacy.views import add_customer, add_user, customer_history, customer_list, delete_customer, delete_medicine, invoices, create_sale, create_purchase, home, add_medicine, supplier, update_medicine, profit, admin_dashboard, user_login, staff_dashboard
+from pharmacy.views import add_customer, add_user, customer_history, customer_list, delete_customer, delete_medicine, invoices, create_sale, create_purchase, home, add_medicine, purchase_invoice, supplier, update_medicine, profit, admin_dashboard, user_login, staff_dashboard
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -28,6 +28,7 @@ urlpatterns = [
     path('invoices/', invoices, name='invoices'),
     path('create_sale/', create_sale, name='create_sale'),
     path('create_purchase/',create_purchase, name='create_purchase'),
+    path('purchase_invoice/',purchase_invoice, name='purchase_invoice'),
     path('update_medicine/<int:id>/',update_medicine,name='update_medicine'),
     path('delete_medicine/<int:id>/',delete_medicine,name='delete_medicine'),
     path('profit/<int:id>/',profit,name='profit' ),
