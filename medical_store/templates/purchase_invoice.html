@@ -6,9 +6,9 @@
 <p><b>Qty:</b> {{ current_purchase.quantity }}</p>
 <p><b>Price:</b> {{ current_purchase.price }}</p>
 
+<button onclick="window.print()">Print</button>
 <hr>
 
-<h3>All Purchases</h3>
 
 <table border="1">
 <tr>
@@ -23,9 +23,7 @@
     <td>{{ p.medicine.name }}</td>
     <td>{{ p.quantity }}</td>
     <td>{{ p.price }}</td>
-    <td>{{ p.quantity|floatformat:2|add:p.price }}</td>
+<td>{{ p.total }}</td>
 </tr>
 {% endfor %}
 </table>
-
-<button onclick="window.print()">Print</button>

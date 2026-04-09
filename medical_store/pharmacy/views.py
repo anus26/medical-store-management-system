@@ -145,9 +145,11 @@ def create_sale(request):
 def purchase_invoice(request):
     purchases = Purchase.objects.all().order_by('-id')
     current_purchase = purchases.first()
-    total = 0
+
     for p in purchases:
-        total += p.quantity * p.price
+        p.total = p.quantity * p.price
+
+    total = sum(p.total for p in purchases)
 
     return render(request, 'purchase_invoice.html', {
         'purchases': purchases,
