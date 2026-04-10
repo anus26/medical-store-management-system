@@ -6,15 +6,33 @@
 
 <h2 class="mb-4">Welcome Admin 👋</h2>
 
-<!-- Profit Card -->
-<div class="card shadow-sm mb-4">
-    <div class="card-body">
-        <h5>Total Profit</h5>
-        <h3 class="text-success">Rs {{ totalProfit }}</h3>
+<!-- TOP CARDS -->
+<div class="row mb-4">
+
+    <div class="col-md-4">
+        <div class="card shadow-sm text-center p-3">
+            <h6>Total Sales</h6>
+            <h3 class="text-success">Rs {{ total_sales }}</h3>
+        </div>
     </div>
+
+    <div class="col-md-4">
+        <div class="card shadow-sm text-center p-3">
+            <h6>Total Purchase</h6>
+            <h3 class="text-danger">Rs {{ total_purchase }}</h3>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card shadow-sm text-center p-3">
+            <h6>Total Profit</h6>
+            <h3 class="text-primary">Rs {{ profit }}</h3>
+        </div>
+    </div>
+
 </div>
 
-<!-- Medicine Table -->
+<!-- MEDICINE TABLE -->
 <div class="card shadow p-3">
 
     <h4 class="mb-3">All Medicines</h4>
@@ -49,5 +67,68 @@
     </table>
 
 </div>
+<!-- GRAPHS -->
+<div class="card shadow p-4 mb-4">
+    <h4 class="mb-3">Analytics 📊</h4>
+
+    <div class="row">
+        <div class="col-md-4">
+            <canvas id="salesChart"></canvas>
+        </div>
+        <div class="col-md-4">
+            <canvas id="purchaseChart"></canvas>
+        </div>
+        <div class="col-md-4">
+            <canvas id="profitChart"></canvas>
+        </div>
+    </div>
+   
+</div>
+
+
+
+<!-- Chart.js -->
+ 
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+
+        let sales=Number('{{total_sales|default:"0"}}');
+        let purchase=Number('{{total_purchase|default:"0"}}');
+        let profit=Number('{{profit|default:"0"}}');
+
+new Chart(document.getElementById('salesChart'), {
+    type: 'doughnut',
+    data: {
+        labels: ['Sales'],
+        datasets: [{
+            data: [sales],
+       
+        }]
+    }
+});
+
+new Chart(document.getElementById('purchaseChart'), {
+    type: 'doughnut',
+    data: {
+        labels: ['Purchase'],
+        datasets: [{
+            data: [purchase],
+   
+        }]
+    }
+});
+
+new Chart(document.getElementById('profitChart'), {
+    type: 'doughnut',
+    data: {
+        labels: ['Profit'],
+        datasets: [{
+            data: [profit],
+        }]
+    }
+});
+    })
+</script>
+
 
 {% endblock %}

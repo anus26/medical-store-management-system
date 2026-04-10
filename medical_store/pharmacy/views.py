@@ -401,22 +401,34 @@ def admin_dashboard(request):
         return redirect("/login/")
 
     medicines = Medicine.objects.all()
-    tablets = Medicine.objects.filter(category='Tablets')
-    syrups = Medicine.objects.filter(category='syrup')
     sales = Sale.objects.all()
+    purchases = Purchase.objects.all()
 
-    totalProfit = 0
+    # ✅ FIXED
+    total_sales = sum([s.total_price or 0 for s in sales])
 
-    for sale in sales:
-        profit = sale.total_price - (sale.medicine.price * sale.quantity)
-        totalProfit += profit
+    # ✅ Purchase me total = qty * price
+    total_purchase = sum([p.quantity * p.price for p in purchases])
+
+    # ✅ Profit
+    profit = total_sales - total_purchase
 
     return render(request, "admin_dashboard.html", {
         'medicines': medicines,
-        'tablets': tablets,
-        'syrups': syrups,
-        'totalProfit': totalProfit
+        'total_sales': total_sales,
+        'total_purchase': total_purchase,
+        'profit': profit
     })
+
+
+
+
+
+
+
+
+
+
 @login_required
 def staff_dashboard(request):
     if request.user.groups.filter(name="Staff").exists() or request.user.groups.filter(name="Admin").exists():
@@ -426,4 +438,3 @@ def staff_dashboard(request):
         })
 
     return redirect("/login/")
-
