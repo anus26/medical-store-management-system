@@ -1,37 +1,53 @@
-<h2>Welcome Admin </h2>
+{% extends 'base.html' %}
 
-<a href="/add_medicine/">Add Medicine</a>
-<a href="/create_purchase/">Purchase</a>
-<a href="/supplier/">Supplier</a>
-   <h3>All Medicines</h3>
-<table border="1">
-    <tr>
-        <th>Name</th>
-        <th>Category</th>
-        <th>Quantity</th>
-        <th>Expiry</th>
-    </tr>
-    {% for m in medicines %}
-  <tr>
-    <td>{{m.name}}</td>
-    <td>{{m.category}}</td>
-    <td>{{m.quantity}}</td>
-    <td>{{m.expiry_date}}</td>
-    
-    <td>
-        <a href="{% url 'update_medicine' id=m.id %}">Update</a>
-    </td>
-    
-    <td>
-        <a href="{% url 'delete_medicine' id=m.id %}">Delete</a>
-    </td>
-    
-    <td>
-        <a href="{% url 'profit' id=m.id %}">View Profit</a>
-    </td>
-</tr>
-{% endfor %}
-</table>
+{% block title %}Admin Dashboard{% endblock %}
 
+{% block content %}
 
-<h4>TotalProfit :{{totalProfit}}</h4>
+<h2 class="mb-4">Welcome Admin 👋</h2>
+
+<!-- Profit Card -->
+<div class="card shadow-sm mb-4">
+    <div class="card-body">
+        <h5>Total Profit</h5>
+        <h3 class="text-success">Rs {{ totalProfit }}</h3>
+    </div>
+</div>
+
+<!-- Medicine Table -->
+<div class="card shadow p-3">
+
+    <h4 class="mb-3">All Medicines</h4>
+
+    <table class="table table-bordered table-hover">
+        <thead class="table-primary">
+            <tr>
+                <th>Name</th>
+                <th>Category</th>
+                <th>Quantity</th>
+                <th>Expiry</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            {% for m in medicines %}
+            <tr>
+                <td>{{ m.name }}</td>
+                <td>{{ m.category }}</td>
+                <td>{{ m.quantity }}</td>
+                <td>{{ m.expiry_date }}</td>
+
+                <td>
+                    <a class="btn btn-sm btn-warning" href="{% url 'update_medicine' id=m.id %}">Update</a>
+                    <a class="btn btn-sm btn-danger" href="{% url 'delete_medicine' id=m.id %}">Delete</a>
+                    <a class="btn btn-sm btn-info text-white" href="{% url 'profit' id=m.id %}">Profit</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+</div>
+
+{% endblock %}

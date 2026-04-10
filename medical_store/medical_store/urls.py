@@ -15,11 +15,13 @@
 #     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 # """
 
+from pharmacy.views import home, user_logout
+
 from django.contrib import admin
 from django.urls import path
 
 
-from pharmacy.views import add_customer, add_user, customer_history, customer_list, delete_customer, delete_medicine, invoices, create_sale, create_purchase, home, add_medicine, purchase_invoice, supplier, update_medicine, profit, admin_dashboard, user_login, staff_dashboard
+from pharmacy.views import add_customer, add_user, customer_history, customer_list, delete_customer, delete_medicine, invoices, create_sale, create_purchase, home, add_medicine, user_login,purchase_invoice, supplier, update_medicine, profit, admin_dashboard,  staff_dashboard
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -38,7 +40,8 @@ urlpatterns = [
    path('customer-history/<int:id>/', customer_history, name='customer_history'),
      path('delete_customer/<int:id>/',delete_customer, name='delete_customer'),
      path('add_user/', add_user, name='add_user'),
-    path("login/", user_login, name="login"),
+    path('login/',user_login, name="login"),
     path("admin_dashboard/",admin_dashboard, name='admin_dashboard'),
     path("staff_dashboard/",staff_dashboard, name='staff_dashboard'),
+    path('logout/', user_logout, name='logout')
 ]

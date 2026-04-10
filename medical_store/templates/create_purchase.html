@@ -1,84 +1,127 @@
-<h2>Add Purchase</h2>
+{% extends 'base.html' %}
 
-<form method="POST" >
+{% block title %}Add Purchase{% endblock %}
+
+{% block content %}
+
+<div class="card shadow p-4">
+
+<h3 class="mb-3">Add Purchase</h3>
+
+<form method="POST">
     {% csrf_token %}
 
-    <!-- New Medicine -->
+    <div class="row">
 
+        <!-- New Medicine -->
+        <div class="col-md-6 mb-3">
+            <label class="form-label">New Medicine (optional)</label>
+            <input type="text" class="form-control" name="medicine_name" placeholder="Enter new medicine">
+        </div>
 
-         <label>New Medicine (optional):</label>
-         <input type="text" placeholder="Enter new medicine" name="medicine_name" id="purchase">
+        <!-- Select Medicine -->
+        <div class="col-md-6 mb-3">
+            <label class="form-label">Select Medicine</label>
+            <select class="form-select" name="medicine_id" id="medicineSelect">
+                <option value="">-- Select Medicine --</option>
+                {% for m in medicines %}
+                <option value="{{ m.id }}">
+                    {{ m.name }} | Stock: {{ m.quantity }}
+                </option>
+                {% endfor %}
+            </select>
+        </div>
 
-    <!-- Select Existing Medicine -->
-    <label>Select Medicine:</label>
-    <select name="medicine_id" id="medicineSelect">
-        <option value="">-- Select Medicine --</option>
-        {% for m in medicines %}
-        <option value="{{ m.id }}" data-price="{{m.price}}">
-            {{ m.name }} | Stock: {{ m.quantity }}
-        </option>
-        {% endfor %}
-    </select>
-    
-    <!-- Quantity -->
-    <label>Quantity:</label>
-    <input type="number" name="quantity" required id="qty">
-    
-    <!-- Price -->
-    <label>Price:</label>
-    <input type="number" step="0.01" name="price" required id="price">
-    <label>Expiry Date:</label>
-    <input type="date" name="expiry_date" required id="expiry">
-    <!-- Supplier -->
-    <label>Supplier:</label>
-    <select name="supplier" >
-        <option value="">-- Select Supplier --</option>
-        {% for s in suppliers %}
-        <option value="{{ s.id }}">{{ s.name }}</option>
-        {% endfor %}
-    </select>
-    
-    <label >Payment Method:</label>
-    <select name="payment_method" id="payment">
-        <option value="cash">Cash</option>
-        <option value="card">Card</option>
-        <option value="online">Online</option>
-    </select>
-    
-    <label>Payment Status:</label>
-    <select name="payment_status" id="payment"> 
-        <option value="paid">Paid</option>
-        <option value="pending">Pending</option>
-    </select>
-  <button type="button" onclick="addToCart()">+more</button>
-  <table id="addTable" border="1">
-    <thead>
-        <tr>
-            <th>Medicine</th>
-            <th>Quantity</th>
-            <th>Price</th>
-            <th>Expiry Date</th>
-        </tr>
-    </thead>
-    <tbody>
-    </tbody>
-</table
-        <div id="hiddenInputs"></div>
-    <button type="submit">Add Purchase</button>
+        <!-- Quantity -->
+        <div class="col-md-4 mb-3">
+            <label class="form-label">Quantity</label>
+            <input type="number" class="form-control" name="quantity" id="qty">
+        </div>
+
+        <!-- Price -->
+        <div class="col-md-4 mb-3">
+            <label class="form-label">Price</label>
+            <input type="number" class="form-control" step="0.01" name="price" id="price">
+        </div>
+
+        <!-- Expiry -->
+        <div class="col-md-4 mb-3">
+            <label class="form-label">Expiry Date</label>
+            <input type="date" class="form-control" name="expiry_date" id="expiry">
+        </div>
+
+        <!-- Supplier -->
+        <div class="col-md-6 mb-3">
+            <label class="form-label">Supplier</label>
+            <select class="form-select" name="supplier">
+                <option value="">-- Select Supplier --</option>
+                {% for s in suppliers %}
+                <option value="{{ s.id }}">{{ s.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <!-- Payment Method -->
+        <div class="col-md-3 mb-3">
+            <label class="form-label">Payment Method</label>
+            <select class="form-select" name="payment_method">
+                <option value="cash">Cash</option>
+                <option value="card">Card</option>
+                <option value="online">Online</option>
+            </select>
+        </div>
+
+        <!-- Payment Status -->
+        <div class="col-md-3 mb-3">
+            <label class="form-label">Payment Status</label>
+            <select class="form-select" name="payment_status">
+                <option value="paid">Paid</option>
+                <option value="pending">Pending</option>
+            </select>
+        </div>
+
+    </div>
+
+    <!-- Add More Button -->
+    <button type="button" class="btn btn-primary mb-3" onclick="addToCart()">
+        + Add More
+    </button>
+
+    <!-- Table -->
+    <div class="table-responsive">
+        <table class="table table-bordered" id="addTable">
+            <thead class="table-primary">
+                <tr>
+                    <th>Medicine</th>
+                    <th>Quantity</th>
+                    <th>Price</th>
+                    <th>Expiry Date</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+
+    <div id="hiddenInputs"></div>
+
+    <button type="submit" class="btn btn-success">
+        Add Purchase
+    </button>
 
     {% if error %}
-        <p style="color:red;">{{ error }}</p>
+        <p class="text-danger mt-2">{{ error }}</p>
     {% endif %}
+
 </form>
 
-<script>
-  function addToCart() {
-    let medicineSelect = document.getElementById('medicineSelect');
-    let qtyInput = document.getElementById('qty');
-    let priceInput = document.getElementById('price');
-    let expiryInput = document.getElementById('expiry');
+</div>
 
-    let qty = qtyInput.value;
+<script>
+function addToCart() {
+    let medicineSelect = document.getElementById('medicineSelect');
+    let qty = document.getElementById('qty').value;
+    let price = document.getElementById('price').value;
+    let expiry = document.getElementById('expiry').value;
 
     if (!qty || qty <= 0) {
         alert("Enter valid quantity");
@@ -87,10 +130,8 @@
 
     let medId = medicineSelect.value;
     let medText = medicineSelect.options[medicineSelect.selectedIndex].text;
-    let price = priceInput.value;
-    let expiry = expiryInput.value;
 
-    let table = document.getElementById("addTable").getElementsByTagName('tbody')[0];
+    let table = document.querySelector("#addTable tbody");
     let row = table.insertRow();
 
     row.innerHTML = `
@@ -100,10 +141,7 @@
         <td>${expiry}</td>
     `;
 
-    // hidden inputs
-    let hiddenDiv = document.getElementById('hiddenInputs');
-
-    hiddenDiv.innerHTML += `
+    document.getElementById('hiddenInputs').innerHTML += `
         <input type="hidden" name="medicine_id" value="${medId}">
         <input type="hidden" name="quantity" value="${qty}">
         <input type="hidden" name="price" value="${price}">
@@ -111,3 +149,5 @@
     `;
 }
 </script>
+
+{% endblock %}

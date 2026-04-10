@@ -1,6 +1,25 @@
-<h2>Update Medicine</h2>
-<form method="POST">
-    {% csrf_token %}
-    {{form.as_p}}
-    <button type="submit">Update</button>
-</form>
+{% extends 'base.html' %}
+
+{% block title %}Update Medicine{% endblock %}
+
+{% block content %}
+
+<div class="card shadow p-4">
+
+    <h3 class="mb-3">Update Medicine</h3>
+
+    <form method="POST">
+        {% csrf_token %}
+
+        <!-- Django Form -->
+        {{ form.as_p }}
+
+        <button type="submit" class="btn btn-primary mt-3">
+            Update Medicine
+        </button>
+
+    </form>
+
+</div>
+
+{% endblock %}

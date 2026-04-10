@@ -9,30 +9,43 @@ from django.db import transaction
 from .models import Invoice, Medicine, Sale,Purchase,Supplier,Customer
 
 from django.contrib.auth.models import Group,User
-from django.contrib.auth import authenticate, login
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth import authenticate, login, logout
 
 from .forms import MedicineForm
 
 
 def home(request):
-    medicines=Medicine.objects.all()
-    tablets=Medicine.objects.filter(category='Tablets')
-    syrups=Medicine.objects.filter(category='syrup')
-    purchase=Purchase.objects.all()
-    sales=Sale.objects.all()
 
-    totalProfit=0
-    for sale in sales:
-        purchase=Purchase.objects.filter(medicine=sale.medicine).last()
-        if purchase:
-            profit=sale.total_price-(purchase.price*sale.quantity)
-            totalProfit+=profit
-    return render(request, 'index.html',
-                { 'medicines':medicines,
-                 'tablets':tablets,
-                 'syrups':syrups,
-                 'totalProfit':totalProfit}
-                  )
+    if not  request.user.is_authenticated:
+     return redirect('login')
+
+    if request.user.groups.filter(name="Admin").exists():
+        return redirect('admin_dashboard')
+    elif request.user.groups.filter(name="Staff").exists():
+        return redirect('staff_dashboard')
+    
+def user_logout(request):
+     logout(request)
+     return redirect('login')    
+    # medicines=Medicine.objects.all()
+    # tablets=Medicine.objects.filter(category='Tablets')
+    # syrups=Medicine.objects.filter(category='syrup')
+    # purchase=Purchase.objects.all()
+    # sales=Sale.objects.all()
+
+    # totalProfit=0
+    # for sale in sales:
+    #     purchase=Purchase.objects.filter(medicine=sale.medicine).last()
+    #     if purchase:
+    #         profit=sale.total_price-(purchase.price*sale.quantity)
+    #         totalProfit+=profit
+    # return render(request, 'index.html',
+    #             { 'medicines':medicines,
+    #              'tablets':tablets,
+    #              'syrups':syrups,
+    #              'totalProfit':totalProfit}
+    #               )
 
 
 def add_medicine(request):
@@ -208,6 +221,7 @@ def create_purchase(request):
         'medicines': medicines,
         'suppliers': suppliers
     }) 
+
 def supplier_report(request):
     purchase=Purchase.objects.select_related('supplier').all()
     return render(request,'supplier_report.html',{
@@ -381,7 +395,7 @@ def user_login(request):
 
 
 
-
+@login_required
 def admin_dashboard(request):
     if not request.user.groups.filter(name="Admin").exists():
         return redirect("/login/")
@@ -403,6 +417,7 @@ def admin_dashboard(request):
         'syrups': syrups,
         'totalProfit': totalProfit
     })
+@login_required
 def staff_dashboard(request):
     if request.user.groups.filter(name="Staff").exists() or request.user.groups.filter(name="Admin").exists():
         sales=Sale.objects.all()

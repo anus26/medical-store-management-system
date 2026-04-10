@@ -1,9 +1,20 @@
-<h2>Add Medicine</h2>
-<form method="Post">
-    {% csrf_token %}
-    {{form.as_p}}
-    <button type="submit">Save</button>
+{% extends 'base.html' %}
 
+{% block title %}Add Medicine{% endblock %}
 
+{% block content %}
 
-</form>
+<div class="card shadow p-4">
+    <h3>Add Medicine</h3>
+
+    <form method="POST">
+        {% csrf_token %}
+        {{ form.as_p }}
+
+        <button class="btn btn-success mt-3">
+            Save
+        </button>
+    </form>
+</div>
+
+{% endblock %}
