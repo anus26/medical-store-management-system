@@ -1,65 +1,119 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>{% block title %}Dashboard{% endblock %}</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{% block title %}Dashboard{% endblock %}</title>
 
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
 
-    <style>
-        body { background: #f5f7fa; }
-        .sidebar {
-            width: 220px;
-            height: 100vh;
-            position: fixed;
-            background: #0d6efd;
-            padding: 20px;
-            color: white;
-        }
-        .sidebar a {
-            display: block;
-            color: white;
-            text-decoration: none;
-            padding: 10px;
-            margin-bottom: 8px;
-            border-radius: 8px;
-        }
-        .sidebar a:hover {
-            background: rgba(255,255,255,0.2);
-        }
-        .content {
-            margin-left: 240px;
-            padding: 20px;
-        }
-    </style>
+<style>
+    body { background: #f5f7fa; }
+
+.sidebar {
+    width: 220px;
+    height: 100vh;
+    position: fixed;
+    background: #0d6efd;
+    padding: 20px;
+    color: white;
+}
+
+.sidebar a {
+    display: block;
+    color: white;
+    text-decoration: none;
+    padding: 10px;
+    margin-bottom: 8px;
+    border-radius: 8px;
+}
+
+.sidebar a:hover {
+    background: rgba(255,255,255,0.2);
+}
+
+.content {
+    margin-left: 240px;
+    padding: 20px;
+}
+
+/* ✅ MOBILE SAME DESIGN */
+@media (max-width: 768px) {
+
+    .sidebar {
+        position: relative;   /* fixed remove */
+        width: 100%;          /* full width */
+        height: auto;
+    }
+
+    .content {
+        margin-left: 0;
+    }
+}
+</style>
 </head>
 
 <body>
 
-<div class="sidebar">
+<!-- ✅ MOBILE NAVBAR -->
+<nav class="navbar bg-primary d-md-none">
+    <div class="container-fluid">
+        <button class="btn btn-light" data-bs-toggle="offcanvas" data-bs-target="#mobileMenu">
+            <i class="bi bi-list"></i>
+        </button>
+        <span class="navbar-brand text-white">Dashboard</span>
+    </div>
+</nav>
+
+<!-- ✅ OFFCANVAS (Mobile Sidebar) -->
+<div class="offcanvas offcanvas-start" id="mobileMenu">
+    <div class="offcanvas-header">
+        <h5>Menu</h5>
+        <button class="btn-close" data-bs-dismiss="offcanvas"></button>
+    </div>
+
+    <div class="offcanvas-body">
+
+        {% if request.user.is_authenticated and request.user.groups.all.0.name == "Admin" %}
+            <a href="/">Dashboard</a>
+            <a href="/add_medicine/">Add Medicine</a>
+            <a href="/create_purchase/">Purchase</a>
+            <a href="/supplier/">Supplier</a>
+        {% endif %}
+
+        {% if request.user.is_authenticated and request.user.groups.all.0.name == "Staff" %}
+            <a href="/staff_dashboard/">Dashboard</a>
+            <a href="/create_sale/">Sales</a>
+            <a href="/add_customer/">Add Customer</a>
+            <a href="/customer_list/">Customers</a>
+        {% endif %}
+
+        <form method="POST" action="{% url 'logout' %}">
+            {% csrf_token %}
+            <button class="btn btn-danger w-100 mt-3">Logout</button>
+        </form>
+
+    </div>
+</div>
+
+<!-- ✅ DESKTOP SIDEBAR -->
+<div class="sidebar d-none d-md-block">
 
     <h4><i class="bi bi-person-circle"></i> Menu</h4>
     <hr>
 
-    <!-- ✅ ADMIN MENU -->
     {% if request.user.is_authenticated and request.user.groups.all.0.name == "Admin" %}
-
         <a href="/"><i class="bi bi-house"></i> Dashboard</a>
         <a href="/add_medicine/"><i class="bi bi-capsule"></i> Add Medicine</a>
         <a href="/create_purchase/"><i class="bi bi-cart"></i> Purchase</a>
         <a href="/supplier/"><i class="bi bi-truck"></i> Supplier</a>
-
     {% endif %}
 
-    <!-- ✅ STAFF MENU -->
     {% if request.user.is_authenticated and request.user.groups.all.0.name == "Staff" %}
-
         <a href="/staff_dashboard/"><i class="bi bi-speedometer2"></i> Dashboard</a>
         <a href="/create_sale/"><i class="bi bi-cash"></i> Sales</a>
         <a href="/add_customer/"><i class="bi bi-person-plus"></i> Add Customer</a>
         <a href="/customer_list/"><i class="bi bi-people"></i> Customers</a>
-
     {% endif %}
 
     <form method="POST" action="{% url 'logout' %}">
@@ -71,12 +125,13 @@
 
 </div>
 
+<!-- ✅ CONTENT -->
 <div class="content">
     {% block content %}
     {% endblock %}
 </div>
 
-<!-- Chart.js only once -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 </body>

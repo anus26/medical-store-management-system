@@ -403,12 +403,10 @@ def user_login(request):
 
 @login_required
 def admin_dashboard(request):
-
-    # ✅ ROLE FLAGS (FIXED)
     is_admin = request.user.groups.filter(name="Admin").exists()
     is_staff = request.user.groups.filter(name="Staff").exists()
 
-    # ❌ ACCESS CONTROL
+  
     if not is_admin:
         return redirect("login")
 
@@ -423,11 +421,14 @@ def admin_dashboard(request):
         .order_by('month')
     )
 
+
     months = [0] * 12
 
     for item in monthly_sales:
         idx = item['month'] - 1
         months[idx] = item['total'] or 0
+
+    low_stock=Medicine.objects.filter(quantity__lte=10)    
 
     # 💰 TOTALS
     sales = Sale.objects.all()
@@ -440,6 +441,7 @@ def admin_dashboard(request):
     return render(request, "admin_dashboard.html", {
         "medicines": medicines,
         "total_sales": total_sales,
+        'low_stock':low_stock,
         "total_purchase": total_purchase,
         "profit": profit,
         "monthly_sales": json.dumps(months),
