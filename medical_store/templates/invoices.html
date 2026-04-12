@@ -1,23 +1,89 @@
-<h2>🧾 Latest Invoice</h2>
+{% extends 'base.html' %}
 
-{% if current_invoice %}
-    <div style="border:2px solid green; padding:10px; margin-bottom:20px;">
-        <p><b>Customer:</b> {{ current_invoice.customer.name }}</p>
+{% block title %}Invoice{% endblock %}
 
-        <h4>Items:</h4>
-        <ul>
-            {% for item in current_invoice.items.all %}
-                <li>
-                    {{ item.medicine.name }} -
-                    Qty: {{ item.quantity }} -
-                    Price: {{ item.total_price }}
-                </li>
-            {% endfor %}
-        </ul>
+{% block content %}
 
-        <p><b>Subtotal:</b> {{ current_invoice.subtotal }}</p>
-        <p><b>GST:</b> {{ current_invoice.tax }}</p>
-        <h3><b>Total:</b> {{ current_invoice.total }}</h3>
+<div class="card shadow p-4">
+
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h3 class="text-primary">
+            🧾 Latest Invoice
+        </h3>
+
+        <button onclick="window.print()" class="btn btn-dark btn-sm">
+            <i class="bi bi-printer"></i> Print
+        </button>
     </div>
-    <button onclick="window.print()">Print</button>
-{% endif %}
+
+    {% if current_invoice %}
+
+    <!-- Customer Info -->
+    <div class="alert alert-success">
+        <b>Customer:</b> {{ current_invoice.customer.name }}
+    </div>
+
+    <!-- Items Table -->
+    <div class="table-responsive">
+
+        <table class="table table-bordered table-hover">
+
+            <thead class="table-dark">
+                <tr>
+                    <th>Medicine</th>
+                    <th>Qty</th>
+                    <th>Price</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for item in current_invoice.items.all %}
+                <tr>
+                    <td>{{ item.medicine.name }}</td>
+                    <td>{{ item.quantity }}</td>
+                    <td>Rs {{ item.total_price }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+
+        </table>
+
+    </div>
+
+    <!-- Summary -->
+    <div class="row mt-3">
+
+        <div class="col-md-4">
+            <div class="card p-3 text-center">
+                <h6>Subtotal</h6>
+                <h5>Rs {{ current_invoice.subtotal }}</h5>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card p-3 text-center">
+                <h6>GST</h6>
+                <h5>Rs {{ current_invoice.tax }}</h5>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card p-3 text-center bg-success text-white">
+                <h6>Total</h6>
+                <h4>Rs {{ current_invoice.total }}</h4>
+            </div>
+        </div>
+
+    </div>
+
+    {% else %}
+
+    <div class="alert alert-warning text-center">
+        No invoice found
+    </div>
+
+    {% endif %}
+
+</div>
+
+{% endblock %}

@@ -42,7 +42,8 @@
     <h4><i class="bi bi-person-circle"></i> Menu</h4>
     <hr>
 
-{% if is_admin %}
+    <!-- ✅ ADMIN MENU -->
+    {% if request.user.is_authenticated and request.user.groups.all.0.name == "Admin" %}
 
         <a href="/"><i class="bi bi-house"></i> Dashboard</a>
         <a href="/add_medicine/"><i class="bi bi-capsule"></i> Add Medicine</a>
@@ -51,7 +52,8 @@
 
     {% endif %}
 
-    {% if is_staff %}
+    <!-- ✅ STAFF MENU -->
+    {% if request.user.is_authenticated and request.user.groups.all.0.name == "Staff" %}
 
         <a href="/staff_dashboard/"><i class="bi bi-speedometer2"></i> Dashboard</a>
         <a href="/create_sale/"><i class="bi bi-cash"></i> Sales</a>

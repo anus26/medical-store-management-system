@@ -7,9 +7,10 @@ from statistics import quantiles
 from django.shortcuts import render, redirect
 from django.core.paginator import Paginator
 from django.db import transaction
-from django.db.models import Sum
+from django.db.models import Sum,Q
 from django.db.models.functions import ExtractMonth
-
+from django.http import JsonResponse
+from django.template.loader import render_to_string
 from .models import Invoice, Medicine, Sale,Purchase,Supplier,Customer
 
 from django.contrib.auth.models import Group,User
@@ -399,42 +400,98 @@ def user_login(request):
 
 
 
+
 @login_required
 def admin_dashboard(request):
+
+    # ✅ ROLE FLAGS (FIXED)
     is_admin = request.user.groups.filter(name="Admin").exists()
+    is_staff = request.user.groups.filter(name="Staff").exists()
+
+    # ❌ ACCESS CONTROL
     if not is_admin:
-        return redirect("/login/")
+        return redirect("login")
 
     medicines = Medicine.objects.all()
-    monthly_sales=(
+
+    # 📊 Monthly Sales
+    monthly_sales = (
         Sale.objects
         .annotate(month=ExtractMonth('created_at'))
         .values('month')
         .annotate(total=Sum('total_price'))
         .order_by('month')
     )
-    months=[0]*12
+
+    months = [0] * 12
+
     for item in monthly_sales:
-        month_index=item['month']-1
-        months[month_index]=item['total']
+        idx = item['month'] - 1
+        months[idx] = item['total'] or 0
+
+    # 💰 TOTALS
     sales = Sale.objects.all()
     purchases = Purchase.objects.all()
-    print(monthly_sales)
-    # ✅ FIXED
-    total_sales = sum([s.total_price or 0 for s in sales])
 
-    # ✅ Purchase me total = qty * price
-    total_purchase = sum([p.quantity * p.price for p in purchases])
-
-    # ✅ Profit
+    total_sales = sum(s.total_price or 0 for s in sales)
+    total_purchase = sum(p.quantity * p.price for p in purchases)
     profit = total_sales - total_purchase
 
     return render(request, "admin_dashboard.html", {
-        'medicines': medicines,
-        'total_sales': total_sales,
-        'total_purchase': total_purchase,
-        'profit': profit,
-        'monthly_sales': json.dumps(months) 
+        "medicines": medicines,
+        "total_sales": total_sales,
+        "total_purchase": total_purchase,
+        "profit": profit,
+        "monthly_sales": json.dumps(months),
+
+        # ✅ sidebar control
+        "is_admin": is_admin,
+        "is_staff": is_staff,
+    })
+
+@login_required
+def staff_dashboard(request):
+
+    is_admin = request.user.groups.filter(name="Admin").exists()
+    is_staff = request.user.groups.filter(name="Staff").exists()
+
+    if not is_staff and not is_admin:
+        return redirect("login")
+
+    search_query = request.GET.get('search', '')
+    date_from = request.GET.get('date_from')
+    date_to = request.GET.get('date_to')
+
+    sales_list = Sale.objects.select_related('medicine', 'customer').all().order_by('-id')
+
+    # 🔍 SEARCH FIX
+    if search_query:
+        sales_list = sales_list.filter(
+            Q(medicine__name__icontains=search_query) |
+            Q(customer__name__icontains=search_query)
+        )
+
+    # 📅 DATE FILTER
+    if date_from:
+        sales_list = sales_list.filter(created_at__gte=date_from)
+
+    if date_to:
+        sales_list = sales_list.filter(created_at__lte=date_to)
+
+    # 📄 PAGINATION
+    paginator = Paginator(sales_list, 5)
+    page = request.GET.get('page')
+    sales = paginator.get_page(page)
+
+    return render(request, "staff_dashboard.html", {
+        "sales": sales,
+        "search_query": search_query,
+        "date_from": date_from,
+        "date_to": date_to,
+
+        # sidebar fix
+        "is_admin": is_admin,
+        "is_staff": is_staff,
     })
 
 
@@ -446,18 +503,44 @@ def admin_dashboard(request):
 
 
 
-@login_required
-def staff_dashboard(request):
-
-    is_staff = request.user.groups.filter(name="Staff").exists()
-    if is_staff:
-     redirect('/login/')
-    sales=Sale.objects.all()
-    paginator=Paginator(sales,10)
-    page_number=request.GET.get('page')
-    sales=paginator.get_page(page_number)
-    return render(request, "staff_dashboard.html",{
-            'sales':sales
-        })
 
 
+# @login_required
+# def staff_dashboard(request):
+
+#     search_query = request.GET.get('search', '')
+#     date_from = request.GET.get('date_from')
+#     date_to = request.GET.get('date_to')
+
+#     sales_list = Sale.objects.select_related('medicine', 'customer').all().order_by('-id')
+
+#     # 🔍 SEARCH
+#     if search_query:
+#         sales_list = sales_list.filter(
+#             Q(medicine__name__icontains=search_query) |
+#             Q(customer__name__icontains=search_query)
+#         )
+
+#     # 📅 DATE FILTER
+#     if date_from:
+#         sales_list = sales_list.filter(data__gte=date_from)
+
+#     if date_to:
+#         sales_list = sales_list.filter(data__lte=date_to)
+
+#     # 📄 PAGINATION
+#     paginator = Paginator(sales_list, 5)
+#     page = request.GET.get('page')
+#     sales = paginator.get_page(page)
+
+#     # 🔥 AJAX REQUEST (LIVE SEARCH)
+#     if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+#         html = render_to_string('partials/sale_table.html', {'sales': sales})
+#         return JsonResponse({'html': html})
+
+#     return render(request, "staff_dashboard.html", {
+#         'sales': sales,
+#         'search_query': search_query,
+#         'date_from': date_from,
+#         'date_to': date_to
+#     })

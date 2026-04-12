@@ -1,29 +1,78 @@
-<h2>Customer List</h2>
+{% extends 'base.html' %}
 
-<table border="1" cellpadding="10">
-    <tr>
-        <th>ID</th>
-        <th>Name</th>
-        <th>Contact</th>
-        <th>Address</th>
-        <th>Actions</th>
-    </tr>
+{% block title %}Customer List{% endblock %}
 
-    {% for c in customers %}
-    <tr>
-        <td>{{ c.id }}</td>
-        <td>{{ c.name }}</td>
-        <td>{{ c.contact }}</td>
-        <td>{{ c.address }}</td>
-        <td>
-            <a href="{% url 'customer_history' c.id %}">History</a> |
-  <form action="{% url 'delete_customer' c.id %}" method="POST" style="display:inline;">
-    {% csrf_token %}
-    <button type="submit" onclick="return confirm('Delete this customer?')">
-        Delete
-    </button>
-</form>
-        </td>
-    </tr>
-    {% endfor %}
-</table>
+{% block content %}
+
+<div class="card shadow p-4">
+
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h3 class="text-primary mb-0">
+            <i class="bi bi-people"></i> Customer List
+        </h3>
+
+        <a href="/add_customer/" class="btn btn-success btn-sm">
+            <i class="bi bi-person-plus"></i> Add Customer
+        </a>
+    </div>
+
+    <div class="table-responsive">
+
+        <table class="table table-hover table-bordered align-middle">
+
+            <thead class="table-dark">
+                <tr>
+                    <th>ID</th>
+                    <th>Name</th>
+                    <th>Contact</th>
+                    <th>Address</th>
+                    <th class="text-center">Actions</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for c in customers %}
+                <tr>
+                    <td>{{ c.id }}</td>
+                    <td>{{ c.name }}</td>
+                    <td>{{ c.contact }}</td>
+                    <td>{{ c.address }}</td>
+
+                    <td class="text-center">
+
+                        <a href="{% url 'customer_history' c.id %}"
+                           class="btn btn-sm btn-info text-white">
+                            <i class="bi bi-clock-history"></i> History
+                        </a>
+
+                        <form action="{% url 'delete_customer' c.id %}"
+                              method="POST"
+                              class="d-inline">
+                            {% csrf_token %}
+
+                            <button type="submit"
+                                    class="btn btn-sm btn-danger"
+                                    onclick="return confirm('Delete this customer?')">
+                                <i class="bi bi-trash"></i> Delete
+                            </button>
+                        </form>
+
+                    </td>
+                </tr>
+
+                {% empty %}
+                <tr>
+                    <td colspan="5" class="text-center text-muted">
+                        No customers found
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+
+        </table>
+
+    </div>
+
+</div>
+
+{% endblock %}

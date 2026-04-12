@@ -1,114 +1,139 @@
-<form method="POST" action="{% url 'create_sale' %}">
-    
-    {% csrf_token %}
+{% extends 'base.html' %}
 
-    <label>Customer:</label>
-    <select name="customer">
-        {% for c in customers %}
-        <option value="{{ c.id }}">{{ c.name }}</option>
-        {% endfor %}
-    </select>
+{% block title %}Create Sale{% endblock %}
+{% block page_title %}Create Sale 💳{% endblock %}
 
-    <br><br>
+{% block content %}
 
-    <!-- ✅ select OUTSIDE -->
-    <select id="medicineSelect">
-        {% for m in medicines %}
-        <option value="{{ m.id }}" data-price="{{m.price}}">
-            {{ m.name }} - {{ m.price }}
-        </option>
-        {% endfor %}
-    </select>
+<div class="card shadow p-4 border-0">
 
-    <input type="number" id="qty" placeholder="qty">
-    <button type="button" onclick="addToCart()">+ Add</button>
+    <h3 class="mb-4 text-primary">New Sale</h3>
 
-    <br><br>
+    <form method="POST" action="{% url 'create_sale' %}">
+        {% csrf_token %}
 
-    <table border="1" id="cartTable">
-        <tr>
-            <th>Medicine</th>
-            <th>Qty</th>
-            <th>Price</th>
-            <th>Action</th>
-        </tr>
-    </table>
+        <!-- CUSTOMER -->
+        <div class="mb-3">
+            <label class="form-label">Customer</label>
+            <select name="customer" class="form-select">
+                {% for c in customers %}
+                <option value="{{ c.id }}">{{ c.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
 
-    <!-- ✅ hidden inputs container -->
-    <div id="hiddenInputs"></div>
+        <!-- MEDICINE + QTY -->
+        <div class="row g-2 mb-3">
 
-    <h3>Subtotal: <span id="subtotal">0</span></h3>
-    <h3>GST (10%): <span id="gst">0</span></h3>
-    <h3>Total: <span id="total">0</span></h3>
+            <div class="col-md-6">
+                <label class="form-label">Medicine</label>
+                <select id="medicineSelect" class="form-select">
+                    {% for m in medicines %}
+                    <option value="{{ m.id }}" data-price="{{ m.price }}">
+                        {{ m.name }} - Rs {{ m.price }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
 
-    <button type="submit">Generate Bill</button>
-</form>
+            <div class="col-md-3">
+                <label class="form-label">Qty</label>
+                <input type="number" id="qty" class="form-control">
+            </div>
 
+            <div class="col-md-3 d-flex align-items-end">
+                <button type="button" onclick="addToCart()" class="btn btn-success w-100">
+                    + Add
+                </button>
+            </div>
+
+        </div>
+
+        <!-- TABLE -->
+        <div class="table-responsive">
+            <table class="table table-bordered text-center" id="cartTable">
+                <thead class="table-dark">
+                    <tr>
+                        <th>Medicine</th>
+                        <th>Qty</th>
+                        <th>Total</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+
+        <!-- TOTAL -->
+        <div class="card bg-light p-3 mb-3">
+            <h5>Subtotal: Rs <span id="subtotal">0</span></h5>
+            <h5>GST: Rs <span id="gst">0</span></h5>
+            <h4 class="text-success">Total: Rs <span id="total">0</span></h4>
+        </div>
+
+        <!-- HIDDEN -->
+        <div id="hiddenInputs"></div>
+
+        <button type="submit" class="btn btn-primary w-100">
+            Generate Bill
+        </button>
+
+    </form>
+</div>
 
 <script>
 let subtotal = 0;
 
 function addToCart() {
+
     let select = document.getElementById("medicineSelect");
-    let qty = document.getElementById('qty').value;
+    let qty = document.getElementById("qty").value;
 
     if (!qty || qty <= 0) {
-        alert("Enter valid quantity");
+        alert("Enter quantity");
         return;
     }
 
     let medId = select.value;
-    let medText = select.options[select.selectedIndex].text;
+    let text = select.options[select.selectedIndex].text;
     let price = parseFloat(select.options[select.selectedIndex].dataset.price);
 
-    let totalPrice = price * qty;
-    subtotal += totalPrice;
+    let total = price * qty;
+    subtotal += total;
 
-    // ✅ add row
-    let table = document.getElementById("cartTable");
-    let row = table.insertRow();
+    let tbody = document.querySelector("#cartTable tbody");
+
+    let row = document.createElement("tr");
 
     row.innerHTML = `
-        <td>${medText}</td>
+        <td>${text}</td>
         <td>${qty}</td>
-        <td>${totalPrice.toFixed(2)}</td>
-        <td><button type="button" onclick="removeItem(this, ${totalPrice})">Remove</button></td>
+        <td>${total.toFixed(2)}</td>
+        <td><button type="button" class="btn btn-danger btn-sm">X</button></td>
     `;
 
-    // ✅ hidden inputs
-    let hiddenDiv = document.getElementById("hiddenInputs");
+    row.querySelector("button").onclick = function () {
+        subtotal -= total;
+        row.remove();
+        updateTotals();
+    };
 
-    let medInput = document.createElement("input");
-    medInput.type = "hidden";
-    medInput.name = "medicine";
-    medInput.value = medId;
+    tbody.appendChild(row);
 
-    let qtyInput = document.createElement("input");
-    qtyInput.type = "hidden";
-    qtyInput.name = "quantity";
-    qtyInput.value = qty;
-
-  row.appendChild(medInput);
-row.appendChild(qtyInput);
-
-    updateTotals();
-}
-
-function removeItem(btn, price) {
-    let row = btn.parentNode.parentNode;
-    row.remove();
-
-    subtotal -= price;
+    document.getElementById("hiddenInputs").innerHTML += `
+        <input type="hidden" name="medicine" value="${medId}">
+        <input type="hidden" name="quantity" value="${qty}">
+    `;
 
     updateTotals();
 }
 
 function updateTotals() {
-    let gst = subtotal * 0.10;   // ✅ FIXED
-    let total = subtotal + gst;
-
+    let gst = subtotal * 0.10;
     document.getElementById("subtotal").innerText = subtotal.toFixed(2);
     document.getElementById("gst").innerText = gst.toFixed(2);
-    document.getElementById("total").innerText = total.toFixed(2);
+    document.getElementById("total").innerText = (subtotal + gst).toFixed(2);
 }
 </script>
+
+{% endblock %}

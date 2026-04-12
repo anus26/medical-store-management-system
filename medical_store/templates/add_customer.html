@@ -1,11 +1,38 @@
-<h2>Add Customer</h2>
+{% extends 'base.html' %}
 
-<form method="POST">
-    {% csrf_token %}
+{% block title %}Add Customer{% endblock %}
 
-    <input type="text" name="name" placeholder="Customer Name" required>
-    <input type="text" name="contact" placeholder="Contact" required>
-    <textarea name="address" placeholder="Address"></textarea>
+{% block content %}
 
-    <button type="submit">Add Customer</button>
-</form>
+<div class="card shadow p-4" style="max-width: 500px; margin:auto;">
+
+    <h3 class="mb-3 text-primary">
+        <i class="bi bi-person-plus"></i> Add Customer
+    </h3>
+
+    <form method="POST">
+        {% csrf_token %}
+
+        <div class="mb-3">
+            <label class="form-label">Customer Name</label>
+            <input type="text" name="name" class="form-control" placeholder="Enter name" required>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Contact</label>
+            <input type="text" name="contact" class="form-control" placeholder="Enter contact" required>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Address</label>
+            <textarea name="address" class="form-control" placeholder="Enter address"></textarea>
+        </div>
+
+        <button class="btn btn-success w-100">
+            <i class="bi bi-check-circle"></i> Save Customer
+        </button>
+    </form>
+
+</div>
+
+{% endblock %}

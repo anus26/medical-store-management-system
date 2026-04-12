@@ -36,51 +36,71 @@
 </div>
 
 <!-- SALES TABLE -->
+<!-- SALES TABLE -->
 <div class="card shadow p-3">
 
     <h4 class="mb-3">Recent Sales</h4>
 
-    <table class="table table-bordered table-hover">
+    <!-- FILTER -->
+    <form id="searchForm" class="row g-2 mb-3">
 
-        <thead class="table-primary">
-            <tr>
-                <th>Medicine</th>
-                <th>Qty</th>
-                <th>Total</th>
-            </tr>
-        </thead>
+        <div class="col-md-4">
+            <input type="text" id="searchInput" class="form-control"
+                   placeholder="Search medicine or customer">
+        </div>
 
-        <tbody>
-            {% for s in sales %}
-            <tr>
-                <td>{{ s.medicine.name }}</td>
-                <td>{{ s.quantity }}</td>
-                <td>Rs {{ s.total_price }}</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-        <ul class="pagination justify-content-center">
-            {% if sales.has_previous %}
-            <li class="page-item">
-                <a class="page_link" href="?page={{sales.previous_page_number}}">Previous</a>
-            </li>
-            {% endif %}
-            {% if num in sales.paginator.page_range %}
-            <li class="page-item {% if sales.number == num %}active{% endif %}">
-                <a class="page-link" href="?page={{num}}">{{num}}</a>
-            </li>
-            {% endif %}
-            {% if sales.has_next %}
-            <li class="page-item">
-                <a class="page-link" href="?page={{sales.next_page_number}}">Next</a>
+        <div class="col-md-3">
+            <input type="date" id="dateFrom" class="form-control">
+        </div>
 
-            </li>
-            {% endif %}
+        <div class="col-md-3">
+            <input type="date" id="dateTo" class="form-control">
+        </div>
 
-        </ul>
+        <div class="col-md-2">
+            <button class="btn btn-primary w-100">Filter</button>
+        </div>
 
-    </table>
+    </form>
+
+    <!-- 🔥 ONLY ONE DYNAMIC CONTAINER -->
+    <div id="tableContainer">
+        {% include 'partials/sale_table.html' %}
+    </div>
 
 </div>
+<script>
+document.addEventListener("DOMContentLoaded", function(){
 
+    const searchInput = document.getElementById("searchInput");
+    const dateFrom = document.getElementById("dateFrom");
+    const dateTo = document.getElementById("dateTo");
+    const tableContainer = document.getElementById("tableContainer");
+
+    function fetchData() {
+
+        let search = searchInput.value;
+        let from = dateFrom.value;
+        let to = dateTo.value;
+
+        fetch(`/staff_dashboard/?search=${search}&date_from=${from}&date_to=${to}`, {
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            tableContainer.innerHTML = data.html;
+        });
+    }
+
+    // 🔥 LIVE SEARCH (typing)
+    searchInput.addEventListener("keyup", fetchData);
+
+    // 📅 date change
+    dateFrom.addEventListener("change", fetchData);
+    dateTo.addEventListener("change", fetchData);
+
+});
+</script>
 {% endblock %}
