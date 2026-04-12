@@ -1,10 +1,14 @@
 
 
 
+import json
 from statistics import quantiles
 
 from django.shortcuts import render, redirect
+from django.core.paginator import Paginator
 from django.db import transaction
+from django.db.models import Sum
+from django.db.models.functions import ExtractMonth
 
 from .models import Invoice, Medicine, Sale,Purchase,Supplier,Customer
 
@@ -397,13 +401,25 @@ def user_login(request):
 
 @login_required
 def admin_dashboard(request):
-    if not request.user.groups.filter(name="Admin").exists():
+    is_admin = request.user.groups.filter(name="Admin").exists()
+    if not is_admin:
         return redirect("/login/")
 
     medicines = Medicine.objects.all()
+    monthly_sales=(
+        Sale.objects
+        .annotate(month=ExtractMonth('created_at'))
+        .values('month')
+        .annotate(total=Sum('total_price'))
+        .order_by('month')
+    )
+    months=[0]*12
+    for item in monthly_sales:
+        month_index=item['month']-1
+        months[month_index]=item['total']
     sales = Sale.objects.all()
     purchases = Purchase.objects.all()
-
+    print(monthly_sales)
     # ✅ FIXED
     total_sales = sum([s.total_price or 0 for s in sales])
 
@@ -417,7 +433,8 @@ def admin_dashboard(request):
         'medicines': medicines,
         'total_sales': total_sales,
         'total_purchase': total_purchase,
-        'profit': profit
+        'profit': profit,
+        'monthly_sales': json.dumps(months) 
     })
 
 
@@ -431,10 +448,16 @@ def admin_dashboard(request):
 
 @login_required
 def staff_dashboard(request):
-    if request.user.groups.filter(name="Staff").exists() or request.user.groups.filter(name="Admin").exists():
-        sales=Sale.objects.all()
-        return render(request, "staff_dashboard.html",{
+
+    is_staff = request.user.groups.filter(name="Staff").exists()
+    if is_staff:
+     redirect('/login/')
+    sales=Sale.objects.all()
+    paginator=Paginator(sales,10)
+    page_number=request.GET.get('page')
+    sales=paginator.get_page(page_number)
+    return render(request, "staff_dashboard.html",{
             'sales':sales
         })
 
-    return redirect("/login/")
+

@@ -73,7 +73,7 @@
 
     <div class="row">
         <div class="col-md-4">
-            <canvas id="salesChart"></canvas>
+         <canvas id="salesChart"></canvas>
         </div>
         <div class="col-md-4">
             <canvas id="purchaseChart"></canvas>
@@ -90,44 +90,49 @@
 <!-- Chart.js -->
  
 <script>
-    document.addEventListener("DOMContentLoaded", function() {
+document.addEventListener("DOMContentLoaded", function() {
 
-        let sales=Number('{{total_sales|default:"0"}}');
-        let purchase=Number('{{total_purchase|default:"0"}}');
-        let profit=Number('{{profit|default:"0"}}');
+    let monthlyData = JSON.parse('{{ monthly_sales|escapejs }}');
+    let purchase = Number('{{ total_purchase|default:"0" }}');
+    let profit = Number('{{ profit|default:"0" }}');
+   console.log("Monthly Data:", monthlyData); 
+    new Chart(document.getElementById('salesChart'), {
+        type: 'line',
+        data: {
+            labels: [
+                'Jan','Feb','Mar','Apr','May','Jun',
+                'Jul','Aug','Sep','Oct','Nov','Dec'
+            ],
+            datasets: [{
+                label: 'Monthly Sales',
+                data: monthlyData,
+                borderWidth: 2,
+                fill: false
+            }]
+        }
+    });
 
-new Chart(document.getElementById('salesChart'), {
-    type: 'doughnut',
-    data: {
-        labels: ['Sales'],
-        datasets: [{
-            data: [sales],
-       
-        }]
-    }
+    new Chart(document.getElementById('purchaseChart'), {
+        type: 'doughnut',
+        data: {
+            labels: ['Purchase'],
+            datasets: [{
+                data: [purchase]
+            }]
+        }
+    });
+
+    new Chart(document.getElementById('profitChart'), {
+        type: 'doughnut',
+        data: {
+            labels: ['Profit'],
+            datasets: [{
+                data: [profit]
+            }]
+        }
+    });
+
 });
-
-new Chart(document.getElementById('purchaseChart'), {
-    type: 'doughnut',
-    data: {
-        labels: ['Purchase'],
-        datasets: [{
-            data: [purchase],
-   
-        }]
-    }
-});
-
-new Chart(document.getElementById('profitChart'), {
-    type: 'doughnut',
-    data: {
-        labels: ['Profit'],
-        datasets: [{
-            data: [profit],
-        }]
-    }
-});
-    })
 </script>
 
 

@@ -66,7 +66,9 @@ class Sale(models.Model):
     customer=models.ForeignKey('Customer',on_delete=models.CASCADE)
     quantity=models.IntegerField()
     total_price=models.FloatField()
-    data=models.DateField(auto_now_add=True)    
+    created_at = models.DateField(auto_now_add=True)
+
+
     def save(self,*args,**kwargs):
         self.total_price=self.medicine.price*self.quantity
         self.medicine.quantity-=self.quantity

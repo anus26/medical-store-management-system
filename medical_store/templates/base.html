@@ -38,20 +38,35 @@
 <body>
 
 <div class="sidebar">
-    <h4><i class="bi bi-speedometer2"></i> Admin</h4>
+
+    <h4><i class="bi bi-person-circle"></i> Menu</h4>
     <hr>
 
-    <a href="/"><i class="bi bi-house"></i> Dashboard</a>
-    <a href="/add_medicine/"><i class="bi bi-capsule"></i> Add Medicine</a>
-    <a href="/create_purchase/"><i class="bi bi-cart"></i> Purchase</a>
-    <a href="/supplier/"><i class="bi bi-truck"></i> Supplier</a>
+{% if is_admin %}
+
+        <a href="/"><i class="bi bi-house"></i> Dashboard</a>
+        <a href="/add_medicine/"><i class="bi bi-capsule"></i> Add Medicine</a>
+        <a href="/create_purchase/"><i class="bi bi-cart"></i> Purchase</a>
+        <a href="/supplier/"><i class="bi bi-truck"></i> Supplier</a>
+
+    {% endif %}
+
+    {% if is_staff %}
+
+        <a href="/staff_dashboard/"><i class="bi bi-speedometer2"></i> Dashboard</a>
+        <a href="/create_sale/"><i class="bi bi-cash"></i> Sales</a>
+        <a href="/add_customer/"><i class="bi bi-person-plus"></i> Add Customer</a>
+        <a href="/customer_list/"><i class="bi bi-people"></i> Customers</a>
+
+    {% endif %}
 
     <form method="POST" action="{% url 'logout' %}">
         {% csrf_token %}
         <button class="btn btn-danger w-100 mt-3">
-            Logout
+            <i class="bi bi-box-arrow-right"></i> Logout
         </button>
     </form>
+
 </div>
 
 <div class="content">

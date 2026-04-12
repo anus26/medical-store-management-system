@@ -1,4 +1,86 @@
-<h2>Welcome Staff 👨‍💼</h2>
+{% extends 'base.html' %}
 
-<a href="/create_sale/">Sales</a>
-<a href="/add_customer/">Add Customer</a>
+{% block title %}Staff Dashboard{% endblock %}
+
+{% block content %}
+
+<h2 class="mb-4">Welcome Staff 👨‍💼</h2>
+
+<!-- QUICK ACTIONS -->
+<div class="row mb-4">
+
+    <div class="col-md-4">
+        <div class="card shadow text-center p-3">
+            <i class="bi bi-cash display-5 text-success"></i>
+            <h5 class="mt-2">Sales</h5>
+            <a href="/create_sale/" class="btn btn-success btn-sm">Start Sale</a>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card shadow text-center p-3">
+            <i class="bi bi-person-plus display-5 text-primary"></i>
+            <h5 class="mt-2">Add Customer</h5>
+            <a href="/add_customer/" class="btn btn-primary btn-sm">Add</a>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card shadow text-center p-3">
+            <i class="bi bi-people display-5 text-warning"></i>
+            <h5 class="mt-2">Customers</h5>
+            <a href="/customer_list/" class="btn btn-warning btn-sm">View</a>
+        </div>
+    </div>
+
+</div>
+
+<!-- SALES TABLE -->
+<div class="card shadow p-3">
+
+    <h4 class="mb-3">Recent Sales</h4>
+
+    <table class="table table-bordered table-hover">
+
+        <thead class="table-primary">
+            <tr>
+                <th>Medicine</th>
+                <th>Qty</th>
+                <th>Total</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            {% for s in sales %}
+            <tr>
+                <td>{{ s.medicine.name }}</td>
+                <td>{{ s.quantity }}</td>
+                <td>Rs {{ s.total_price }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+        <ul class="pagination justify-content-center">
+            {% if sales.has_previous %}
+            <li class="page-item">
+                <a class="page_link" href="?page={{sales.previous_page_number}}">Previous</a>
+            </li>
+            {% endif %}
+            {% if num in sales.paginator.page_range %}
+            <li class="page-item {% if sales.number == num %}active{% endif %}">
+                <a class="page-link" href="?page={{num}}">{{num}}</a>
+            </li>
+            {% endif %}
+            {% if sales.has_next %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{sales.next_page_number}}">Next</a>
+
+            </li>
+            {% endif %}
+
+        </ul>
+
+    </table>
+
+</div>
+
+{% endblock %}
