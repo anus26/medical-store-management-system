@@ -123,7 +123,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'Asia/karachi'
+TIME_ZONE = 'AsiaKarachi'
 
 USE_I18N = True
 
