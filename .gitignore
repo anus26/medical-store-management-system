@@ -1,7 +1,19 @@
+# Python cache
 __pycache__/
 *.pyc
+
+# Virtual environments
 venv/
 .venv/
+
+# Database
 db.sqlite3
+
+# Static files (production collectstatic output)
 staticfiles/
+
+# Environment variables
 .env
+
+# Django migrations cache (optional safe)
+*/__pycache__/
